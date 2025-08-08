@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Quản Lý Học Sinh - Đồng Bộ Hóa</title>
+    <title>App Quản Lý Học Sinh - Hoàn Thiện</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -79,9 +79,8 @@
                 </button>
                 <button class="py-4 px-2 font-medium text-gray-600 hover:text-blue-600" onclick="showTab('communication', this)">
                     <i class="fas fa-comments mr-2"></i>Liên Lạc
-                    <span id="communicationBadge" class="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-1">2</span>
                 </button>
-                <button class="tab-active py-4 px-2 font-medium" onclick="showTab('reports', this)">
+                <button class="py-4 px-2 font-medium text-gray-600 hover:text-blue-600" onclick="showTab('reports', this)">
                     <i class="fas fa-chart-bar mr-2"></i>Báo Cáo & Thống Kê
                 </button>
             </div>
@@ -90,132 +89,51 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-6">
-        <!-- Reports Tab -->
-        <div id="reports" class="tab-content">
-             <!-- Report Controls -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6 no-print">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold">Báo Cáo & Thống Kê Chi Tiết</h3>
-                    <div class="flex space-x-2">
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 export-button" onclick="exportToPDF()">
-                            <i class="fas fa-file-pdf mr-2"></i>Xuất PDF
-                        </button>
-                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 export-button" onclick="exportToExcel()">
-                            <i class="fas fa-file-excel mr-2"></i>Xuất Excel
-                        </button>
-                        <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 export-button" onclick="printReport()">
-                            <i class="fas fa-print mr-2"></i>In Báo Cáo
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- Key Metrics Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="metric-card rounded-lg shadow-md p-6 card-hover">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-gray-600 text-sm">Tổng Học Sinh</p>
-                            <p class="text-3xl font-bold text-blue-600" id="totalStudentsMetric">0</p>
-                        </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-users text-blue-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-card rounded-lg shadow-md p-6 card-hover">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-gray-600 text-sm">Điểm TB Lớp</p>
-                            <p class="text-3xl font-bold text-green-600" id="classAverageMetric">0.0</p>
-                        </div>
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-chart-line text-green-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-card rounded-lg shadow-md p-6 card-hover">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-gray-600 text-sm">Tỷ Lệ Chuyên Cần</p>
-                            <p class="text-3xl font-bold text-purple-600" id="attendanceRateMetric">0%</p>
-                        </div>
-                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user-check text-purple-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-card rounded-lg shadow-md p-6 card-hover">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-gray-600 text-sm">Điểm Nề Nếp TB</p>
-                            <p class="text-3xl font-bold text-orange-600" id="disciplineAverageMetric">0.0</p>
-                        </div>
-                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-clipboard-check text-orange-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold mb-4">Phân Bố Xếp Loại Học Lực</h3>
-                    <div class="chart-container"><canvas id="distributionChart"></canvas></div>
-                </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold mb-4">Phân Bố Xếp Loại Nề Nếp</h3>
-                    <div class="chart-container"><canvas id="disciplineChart"></canvas></div>
-                </div>
-            </div>
-            <!-- Detailed Analysis Tables -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold mb-4"><i class="fas fa-trophy text-yellow-500 mr-2"></i>Học Sinh Xuất Sắc</h3>
-                    <div class="overflow-x-auto"><table class="w-full data-table"><thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Hạng</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Học Sinh</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Điểm TB</th></tr></thead><tbody id="topPerformersTable" class="divide-y divide-gray-200"></tbody></table></div>
-                </div>
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold mb-4"><i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>Học Sinh Cần Hỗ Trợ</h3>
-                    <div class="overflow-x-auto"><table class="w-full data-table"><thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Học Sinh</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Vấn Đề</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Hành Động</th></tr></thead><tbody id="supportNeededTable" class="divide-y divide-gray-200"></tbody></table></div>
-                </div>
-            </div>
-            <!-- Individual Student Report -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold"><i class="fas fa-user text-indigo-500 mr-2"></i>Báo Cáo Cá Nhân Chi Tiết</h3>
-                    <select id="individualStudentSelect" class="border rounded-lg px-3 py-2" onchange="loadIndividualReport()"><option value="">Chọn học sinh</option></select>
-                </div>
-                <div id="individualReportContent" class="hidden"></div>
-            </div>
-        </div>
-
-        <!-- Other tabs content (hidden by default) -->
-        <div id="dashboard" class="tab-content hidden">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 class="text-2xl font-bold text-gray-800">Tổng Quan Lớp 10A1</h3>
-                <p class="text-gray-600">Cập nhật lần cuối: <span id="lastUpdateTime"></span></p>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800">Tổng Quan Lớp 10A1</h3>
+                        <p class="text-gray-600">Cập nhật lần cuối: <span id="lastUpdateTime"></span></p>
+                    </div>
+                    <button onclick="syncAllData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-sync-alt mr-2"></i>Làm mới
+                    </button>
+                </div>
             </div>
-            <!-- Quick Actions, Recent Activities, etc. -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <p class="text-gray-600 text-sm">Tổng Học Sinh</p>
+                    <p class="text-3xl font-bold text-blue-600" id="dashboardTotalStudents">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <p class="text-gray-600 text-sm">Điểm TB Lớp</p>
+                    <p class="text-3xl font-bold text-green-600" id="dashboardClassAverage">0.0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <p class="text-gray-600 text-sm">Tỷ Lệ Chuyên Cần</p>
+                    <p class="text-3xl font-bold text-purple-600" id="dashboardAttendanceRate">0%</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <p class="text-gray-600 text-sm">Điểm Nề Nếp TB</p>
+                    <p class="text-3xl font-bold text-orange-600" id="dashboardDisciplineAverage">0.0</p>
+                </div>
+            </div>
         </div>
 
+        <!-- Students Tab -->
         <div id="students" class="tab-content hidden">
-            <!-- Student Management Header -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold">Quản Lý Danh Sách Học Sinh</h3>
                     <div class="flex space-x-2">
-                         <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 export-button" onclick="showImportModal()">
-                            <i class="fas fa-file-excel mr-2"></i>Nhập từ Excel
-                        </button>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 export-button" onclick="exportStudentsToExcel()">
-                            <i class="fas fa-download mr-2"></i>Xuất Excel
-                        </button>
-                        <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 export-button" onclick="showAddStudentModal()">
-                            <i class="fas fa-plus mr-2"></i>Thêm Học Sinh
-                        </button>
+                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="showModal('importModal')"><i class="fas fa-file-excel mr-2"></i>Nhập từ Excel</button>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" onclick="exportStudentsToExcel()"><i class="fas fa-download mr-2"></i>Xuất Excel</button>
+                        <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700" onclick="showAddStudentModal()"><i class="fas fa-plus mr-2"></i>Thêm Học Sinh</button>
                     </div>
                 </div>
-                <!-- Search and Filter -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Tìm kiếm</label>
                         <div class="relative"><input type="text" id="studentSearch" placeholder="Tên, SBD..." class="w-full border rounded-lg px-3 py-2 pl-10" onkeyup="filterStudents()"><i class="fas fa-search absolute left-3 top-3 text-gray-400"></i></div>
@@ -234,7 +152,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Students Table -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">STT</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Họ và Tên</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SBD</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giới Tính</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Điểm TB</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Xếp Loại</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao Tác</th></tr></thead><tbody id="studentsTableBody" class="divide-y divide-gray-200"></tbody></table>
@@ -243,16 +160,16 @@
             </div>
         </div>
 
+        <!-- Grades Tab -->
         <div id="grades" class="tab-content hidden">
-            <!-- Grades Management Header -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 class="text-lg font-semibold mb-4">Quản Lý Điểm Số</h3>
-                <div class="flex space-x-2">
-                    <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="showBulkGradeModal()"><i class="fas fa-plus mr-2"></i>Nhập Điểm Hàng Loạt</button>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" onclick="exportGradesToExcel()"><i class="fas fa-download mr-2"></i>Xuất Bảng Điểm</button>
+             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Quản Lý Điểm Số</h3>
+                    <div class="flex space-x-2">
+                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="showBulkGradeModal()"><i class="fas fa-plus mr-2"></i>Nhập Điểm Hàng Loạt</button>
+                    </div>
                 </div>
             </div>
-            <!-- Subject Tabs -->
             <div class="bg-white rounded-lg shadow-md mb-6">
                 <div class="border-b"><nav class="flex space-x-8 px-6" id="subject-nav"></nav></div>
                 <div class="p-6">
@@ -262,25 +179,19 @@
             </div>
         </div>
 
+        <!-- Discipline Tab -->
         <div id="discipline" class="tab-content hidden">
-            <!-- Discipline Management Header -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold">Quản Lý Nề Nếp Học Sinh</h3>
-                    <div class="flex space-x-2">
-                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="showAddRewardModal()"><i class="fas fa-plus mr-2"></i>Thêm Khen Thưởng</button>
-                        <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" onclick="showAddViolationModal()"><i class="fas fa-exclamation-triangle mr-2"></i>Ghi Nhận Vi Phạm</button>
-                    </div>
+             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold">Quản Lý Nề Nếp</h3>
                 </div>
-            </div>
-            <!-- Discipline Table -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                 <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">STT</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Học Sinh</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Điểm Nề Nếp</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Xếp Loại</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khen Thưởng</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vi Phạm</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao Tác</th></tr></thead><tbody id="disciplineTableBody" class="divide-y divide-gray-200"></tbody></table></div>
             </div>
         </div>
 
+        <!-- Attendance Tab -->
         <div id="attendance" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h3 class="text-lg font-semibold mb-4">Điểm Danh Hàng Ngày</h3>
                 <div class="flex items-center space-x-4 mb-4">
                     <label for="attendanceDate" class="font-medium">Chọn ngày:</label>
@@ -295,17 +206,68 @@
                  </div>
             </div>
         </div>
-
+        
+        <!-- Communication Tab -->
         <div id="communication" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h3 class="text-lg font-semibold mb-4">Nhật Ký Liên Lạc Phụ Huynh</h3>
-                <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700" onclick="showAddCommLogModal()"><i class="fas fa-plus mr-2"></i>Thêm Nhật Ký</button>
+                <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700" onclick="showModal('addCommLogModal')"><i class="fas fa-plus mr-2"></i>Thêm Nhật Ký</button>
             </div>
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h4 class="text-lg font-semibold mb-4">Lịch sử liên lạc</h4>
-                <div id="commLogContainer" class="space-y-4 max-h-96 overflow-y-auto">
-                    <p class="text-gray-500">Chưa có nhật ký liên lạc nào.</p>
+                <div id="commLogContainer" class="space-y-4 max-h-96 overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 class="text-lg font-semibold">Báo Cáo & Thống Kê</h3>
+            </div>
+             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="metric-card rounded-lg shadow-md p-6 card-hover">
+                    <p class="text-gray-600 text-sm">Tổng Học Sinh</p>
+                    <p class="text-3xl font-bold text-blue-600" id="reportTotalStudents">0</p>
                 </div>
+                <div class="metric-card rounded-lg shadow-md p-6 card-hover">
+                    <p class="text-gray-600 text-sm">Điểm TB Lớp</p>
+                    <p class="text-3xl font-bold text-green-600" id="reportClassAverage">0.0</p>
+                </div>
+                <div class="metric-card rounded-lg shadow-md p-6 card-hover">
+                    <p class="text-gray-600 text-sm">Tỷ Lệ Chuyên Cần</p>
+                    <p class="text-3xl font-bold text-purple-600" id="reportAttendanceRate">0%</p>
+                </div>
+                <div class="metric-card rounded-lg shadow-md p-6 card-hover">
+                    <p class="text-gray-600 text-sm">Điểm Nề Nếp TB</p>
+                    <p class="text-3xl font-bold text-orange-600" id="reportDisciplineAverage">0.0</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Phân Bố Xếp Loại Học Lực</h3>
+                    <div class="chart-container"><canvas id="distributionChart"></canvas></div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Phân Bố Xếp Loại Nề Nếp</h3>
+                    <div class="chart-container"><canvas id="disciplineChart"></canvas></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4"><i class="fas fa-trophy text-yellow-500 mr-2"></i>Top 5 Học Sinh Xuất Sắc</h3>
+                    <div class="overflow-x-auto"><table class="w-full data-table"><thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Hạng</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Học Sinh</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Điểm TB</th></tr></thead><tbody id="topPerformersTable" class="divide-y divide-gray-200"></tbody></table></div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4"><i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>Học Sinh Cần Hỗ Trợ</h3>
+                    <div class="overflow-x-auto"><table class="w-full data-table"><thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Học Sinh</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Vấn Đề</th></tr></thead><tbody id="supportNeededTable" class="divide-y divide-gray-200"></tbody></table></div>
+                </div>
+            </div>
+             <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold"><i class="fas fa-user text-indigo-500 mr-2"></i>Báo Cáo Cá Nhân Chi Tiết</h3>
+                    <select id="individualStudentSelect" class="border rounded-lg px-3 py-2" onchange="loadIndividualReport()"><option value="">Chọn học sinh</option></select>
+                </div>
+                <div id="individualReportContent" class="hidden"></div>
             </div>
         </div>
     </main>
@@ -313,29 +275,30 @@
     <!-- Modals -->
     <div id="addStudentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">Thêm Học Sinh Mới</h3><button onclick="closeModal('addStudentModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><form id="addStudentForm" onsubmit="addNewStudent(event)"><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div><label class="block text-sm font-medium mb-2">Họ và tên *</label><input type="text" id="studentName" required class="w-full border rounded-lg px-3 py-2"></div><div><label class="block text-sm font-medium mb-2">Số báo danh *</label><input type="text" id="studentId" required class="w-full border rounded-lg px-3 py-2"></div><div><label class="block text-sm font-medium mb-2">Giới tính *</label><select id="studentGender" required class="w-full border rounded-lg px-3 py-2"><option value="">Chọn giới tính</option><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div><div><label class="block text-sm font-medium mb-2">Ngày sinh *</label><input type="date" id="studentBirthdate" required class="w-full border rounded-lg px-3 py-2"></div></div><div class="flex justify-end space-x-2"><button type="button" onclick="closeModal('addStudentModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Thêm</button></div></form></div></div>
     <div id="editStudentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">Chỉnh Sửa Thông Tin</h3><button onclick="closeModal('editStudentModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><form id="editStudentForm" onsubmit="updateStudent(event)"><input type="hidden" id="editStudentIndex"><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div><label class="block text-sm font-medium mb-2">Họ và tên *</label><input type="text" id="editStudentName" required class="w-full border rounded-lg px-3 py-2"></div><div><label class="block text-sm font-medium mb-2">Số báo danh *</label><input type="text" id="editStudentId" required class="w-full border rounded-lg px-3 py-2"></div><div><label class="block text-sm font-medium mb-2">Giới tính *</label><select id="editStudentGender" required class="w-full border rounded-lg px-3 py-2"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div><div><label class="block text-sm font-medium mb-2">Ngày sinh *</label><input type="date" id="editStudentBirthdate" required class="w-full border rounded-lg px-3 py-2"></div></div><div class="flex justify-end space-x-2"><button type="button" onclick="closeModal('editStudentModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Cập Nhật</button></div></form></div></div>
-    <div id="addGradeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">Thêm/Sửa Điểm</h3><button onclick="closeModal('addGradeModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><form id="addGradeForm" onsubmit="addGrade(event)"><input type="hidden" id="gradeStudentId"><input type="hidden" id="gradeSubject"><div class="space-y-4"><div><label class="block text-sm font-medium mb-2">Điểm số mới *</label><input type="number" id="gradeValue" min="0" max="10" step="0.1" required class="w-full border rounded-lg px-3 py-2" placeholder="0.0 - 10.0"></div><div><label class="block text-sm font-medium mb-2">Ghi chú</label><textarea id="gradeNote" class="w-full border rounded-lg px-3 py-2" rows="2" placeholder="VD: Kiểm tra 15 phút..."></textarea></div></div><div class="flex justify-end space-x-2 mt-6"><button type="button" onclick="closeModal('addGradeModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Thêm Điểm</button></div></form></div></div>
+    <div id="addGradeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">Thêm/Sửa Điểm</h3><button onclick="closeModal('addGradeModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><form id="addGradeForm" onsubmit="addGrade(event)"><input type="hidden" id="gradeStudentId"><input type="hidden" id="gradeSubject"><div class="space-y-4"><div><label class="block text-sm font-medium mb-2">Điểm số mới *</label><input type="number" id="gradeValue" min="0" max="10" step="0.1" required class="w-full border rounded-lg px-3 py-2" placeholder="0.0 - 10.0"></div></div><div class="flex justify-end space-x-2 mt-6"><button type="button" onclick="closeModal('addGradeModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Thêm Điểm</button></div></form></div></div>
+    <div id="bulkGradeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-screen overflow-y-auto"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">Nhập Điểm Hàng Loạt</h3><button onclick="closeModal('bulkGradeModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">STT</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Học Sinh</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Điểm Mới</th></tr></thead><tbody id="bulkGradeTableBody" class="divide-y divide-gray-200"></tbody></table></div><div class="flex justify-end space-x-2 mt-6"><button type="button" onclick="closeModal('bulkGradeModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button onclick="saveBulkGrades()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Lưu Tất Cả</button></div></div></div>
     <div id="addRewardModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-green-700"><i class="fas fa-trophy mr-2"></i>Thêm Khen Thưởng</h3><button onclick="closeModal('addRewardModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><form id="addRewardForm" onsubmit="addReward(event)"><input type="hidden" id="rewardStudentId"><div class="space-y-4"><div><label class="block text-sm font-medium mb-2">Nội dung khen thưởng *</label><input type="text" id="rewardDescription" required class="w-full border rounded-lg px-3 py-2" placeholder="VD: Đạt điểm 10 môn Toán"></div><div><label class="block text-sm font-medium mb-2">Điểm cộng *</label><input type="number" id="rewardPoints" step="0.5" min="0" max="2" value="1" required class="w-full border rounded-lg px-3 py-2"></div></div><div class="flex justify-end space-x-2 mt-6"><button type="button" onclick="closeModal('addRewardModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Thêm</button></div></form></div></div>
     <div id="addViolationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-red-700"><i class="fas fa-exclamation-triangle mr-2"></i>Ghi Nhận Vi Phạm</h3><button onclick="closeModal('addViolationModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><form id="addViolationForm" onsubmit="addViolation(event)"><input type="hidden" id="violationStudentId"><div class="space-y-4"><div><label class="block text-sm font-medium mb-2">Nội dung vi phạm *</label><input type="text" id="violationDescription" required class="w-full border rounded-lg px-3 py-2" placeholder="VD: Đi học muộn"></div><div><label class="block text-sm font-medium mb-2">Điểm trừ *</label><input type="number" id="violationPoints" step="0.5" min="0.5" max="3" value="1" required class="w-full border rounded-lg px-3 py-2"></div></div><div class="flex justify-end space-x-2 mt-6"><button type="button" onclick="closeModal('addViolationModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Ghi nhận</button></div></form></div></div>
     <div id="addCommLogModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-lg mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">Thêm Nhật Ký Liên Lạc</h3><button onclick="closeModal('addCommLogModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><form id="addCommLogForm" onsubmit="addCommLog(event)"><div class="space-y-4"><div><label class="block text-sm font-medium mb-2">Học sinh *</label><select id="commStudentSelect" required class="w-full border rounded-lg px-3 py-2"></select></div><div><label class="block text-sm font-medium mb-2">Nội dung *</label><textarea id="commContent" required class="w-full border rounded-lg px-3 py-2" rows="3" placeholder="VD: Trao đổi với phụ huynh về tình hình học tập..."></textarea></div><div><label class="block text-sm font-medium mb-2">Ngày liên lạc</label><input type="date" id="commDate" required class="w-full border rounded-lg px-3 py-2"></div></div><div class="flex justify-end space-x-2 mt-6"><button type="button" onclick="closeModal('addCommLogModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Lưu</button></div></form></div></div>
     <div id="confirmationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 max-w-sm mx-4"><h3 class="text-lg font-semibold mb-4">Xác nhận</h3><p id="confirmationMessage" class="text-gray-600 mb-6"></p><div class="flex justify-end space-x-2"><button id="cancelButton" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button id="confirmButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Xác nhận</button></div></div></div>
+    <div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"><h3 class="text-lg font-semibold mb-4">Nhập từ Excel</h3><p class="text-gray-600 mb-4">Chức năng này đang được phát triển.</p><div class="flex justify-end"><button onclick="closeModal('importModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Đóng</button></div></div></div>
     
     <!-- Success Toast -->
     <div id="successToast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 success-animation"><div class="flex items-center"><i class="fas fa-check-circle mr-2"></i><span id="successMessage"></span></div></div>
 
     <script>
         // --- DATA ---
-        // The single source of truth for all student data
         let studentsData = [
-            { id: 1, name: 'Nguyễn Văn An', studentId: 'HS001', birthdate: '2008-03-15', gender: 'Nam', grades: { math: [8.5, 9], literature: [8], english: [7.5], physics: [8], chemistry: [7.5] }, disciplineScore: 9.5, violations: [{ desc: 'Đi muộn', points: 0.5 }], rewards: [], attendance: {}, communication: [] },
-            { id: 2, name: 'Trần Thị Bình', studentId: 'HS002', birthdate: '2008-07-22', gender: 'Nữ', grades: { math: [7], literature: [8], english: [6.5], physics: [7], chemistry: [6.5] }, disciplineScore: 8, violations: [{ desc: 'Không làm BTVN', points: 1 }, { desc: 'Nói chuyện riêng', points: 1 }], rewards: [], attendance: {}, communication: [] },
-            { id: 3, name: 'Lê Văn Cường', studentId: 'HS003', birthdate: '2008-11-10', gender: 'Nam', grades: { math: [9, 9.5], literature: [8.5], english: [8], physics: [9], chemistry: [8.5] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Học sinh xuất sắc', points: 1 }], attendance: {}, communication: [] },
-            { id: 4, name: 'Phạm Thị Dung', studentId: 'HS004', birthdate: '2008-09-05', gender: 'Nữ', grades: { math: [8], literature: [9], english: [7.8], physics: [7.5], chemistry: [8.2] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Tích cực phát biểu', points: 1 }], attendance: {}, communication: [] },
-            { id: 5, name: 'Hoàng Văn Em', studentId: 'HS005', birthdate: '2008-12-18', gender: 'Nam', grades: { math: [6.5], literature: [7.5], english: [6], physics: [6.8], chemistry: [6.5] }, disciplineScore: 9, violations: [{ desc: 'Đi muộn', points: 1 }], rewards: [], attendance: {}, communication: [] },
-            { id: 6, name: 'Vũ Thị Giang', studentId: 'HS006', birthdate: '2008-04-30', gender: 'Nữ', grades: { math: [9.2, 9.5], literature: [8.8], english: [8.5], physics: [9], chemistry: [9.1] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Giải nhất thi HSG', points: 2 }], attendance: {}, communication: [] },
-            { id: 7, name: 'Đỗ Văn Hùng', studentId: 'HS007', birthdate: '2008-06-12', gender: 'Nam', grades: { math: [5.5], literature: [6], english: [4.5], physics: [5], chemistry: [5.2] }, disciplineScore: 6.5, violations: [{ desc: 'Nghỉ không phép', points: 2 }, { desc: 'Gây mất trật tự', points: 1.5 }], rewards: [], attendance: {}, communication: [] },
-            { id: 8, name: 'Bùi Thị Hương', studentId: 'HS008', birthdate: '2008-08-25', gender: 'Nữ', grades: { math: [7.8], literature: [8.5], english: [7.2], physics: [7.5], chemistry: [7.8] }, disciplineScore: 10, violations: [], rewards: [], attendance: {}, communication: [] },
-            { id: 9, name: 'Lý Văn Khánh', studentId: 'HS009', birthdate: '2008-01-08', gender: 'Nam', grades: { math: [8.8], literature: [8.2], english: [8], physics: [8.5], chemistry: [8.3] }, disciplineScore: 9.5, violations: [], rewards: [], attendance: {}, communication: [] },
-            { id: 10, name: 'Ngô Thị Linh', studentId: 'HS010', birthdate: '2008-10-14', gender: 'Nữ', grades: { math: [6.8], literature: [7.5], english: [6.5], physics: [6.8], chemistry: [7] }, disciplineScore: 9, violations: [{ desc: 'Quên đồng phục', points: 1 }], rewards: [], attendance: {}, communication: [] }
+            { id: 1, name: 'Nguyễn Văn An', studentId: 'HS001', birthdate: '2008-03-15', gender: 'Nam', grades: { math: [8.5, 9], literature: [8], english: [7.5], physics: [8], chemistry: [7.5] }, disciplineScore: 9.5, violations: [{ desc: 'Đi muộn', points: 0.5 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 2, name: 'Trần Thị Bình', studentId: 'HS002', birthdate: '2008-07-22', gender: 'Nữ', grades: { math: [7], literature: [8], english: [6.5], physics: [7], chemistry: [6.5] }, disciplineScore: 8, violations: [{ desc: 'Không làm BTVN', points: 1 }, { desc: 'Nói chuyện riêng', points: 1 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'absent_unexcused' }, communication: [] },
+            { id: 3, name: 'Lê Văn Cường', studentId: 'HS003', birthdate: '2008-11-10', gender: 'Nam', grades: { math: [9, 9.5], literature: [8.5], english: [8], physics: [9], chemistry: [8.5] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Học sinh xuất sắc', points: 1 }], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 4, name: 'Phạm Thị Dung', studentId: 'HS004', birthdate: '2008-09-05', gender: 'Nữ', grades: { math: [8], literature: [9], english: [7.8], physics: [7.5], chemistry: [8.2] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Tích cực phát biểu', points: 1 }], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 5, name: 'Hoàng Văn Em', studentId: 'HS005', birthdate: '2008-12-18', gender: 'Nam', grades: { math: [6.5], literature: [7.5], english: [6], physics: [6.8], chemistry: [6.5] }, disciplineScore: 9, violations: [{ desc: 'Đi muộn', points: 1 }], rewards: [], attendance: { '2025-05-01': 'late', '2025-05-02': 'present' }, communication: [] },
+            { id: 6, name: 'Vũ Thị Giang', studentId: 'HS006', birthdate: '2008-04-30', gender: 'Nữ', grades: { math: [9.2, 9.5], literature: [8.8], english: [8.5], physics: [9], chemistry: [9.1] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Giải nhất thi HSG', points: 2 }], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 7, name: 'Đỗ Văn Hùng', studentId: 'HS007', birthdate: '2008-06-12', gender: 'Nam', grades: { math: [5.5], literature: [6], english: [4.5], physics: [5], chemistry: [5.2] }, disciplineScore: 6.5, violations: [{ desc: 'Nghỉ không phép', points: 2 }, { desc: 'Gây mất trật tự', points: 1.5 }], rewards: [], attendance: { '2025-05-01': 'absent_unexcused', '2025-05-02': 'absent_unexcused' }, communication: [] },
+            { id: 8, name: 'Bùi Thị Hương', studentId: 'HS008', birthdate: '2008-08-25', gender: 'Nữ', grades: { math: [7.8], literature: [8.5], english: [7.2], physics: [7.5], chemistry: [7.8] }, disciplineScore: 10, violations: [], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 9, name: 'Lý Văn Khánh', studentId: 'HS009', birthdate: '2008-01-08', gender: 'Nam', grades: { math: [8.8], literature: [8.2], english: [8], physics: [8.5], chemistry: [8.3] }, disciplineScore: 9.5, violations: [], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'absent_excused' }, communication: [] },
+            { id: 10, name: 'Ngô Thị Linh', studentId: 'HS010', birthdate: '2008-10-14', gender: 'Nữ', grades: { math: [6.8], literature: [7.5], english: [6.5], physics: [6.8], chemistry: [7] }, disciplineScore: 9, violations: [{ desc: 'Quên đồng phục', points: 1 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] }
         ];
         const subjectMap = { math: 'Toán', literature: 'Ngữ văn', english: 'Tiếng Anh', physics: 'Vật lý', chemistry: 'Hóa học' };
 
@@ -346,57 +309,38 @@
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', function() {
-            // Set default tab
-            showTab('reports', document.querySelector('#main-nav button:last-child'));
-            
-            // Set default date for attendance
+            showTab('dashboard', document.querySelector('#main-nav button'));
             document.getElementById('attendanceDate').valueAsDate = new Date();
             document.getElementById('commDate').valueAsDate = new Date();
-            
-            // Initial data load and render
             initializeSubjectTabs();
             initializeCharts();
             syncAllData();
         });
 
-        // --- CORE SYNC FUNCTION ---
+        // --- CORE SYNC & UTILITY FUNCTIONS ---
         function syncAllData() {
             console.log("Syncing all application data...");
             updateLastUpdateTime();
-            
-            // Update data models and UI components
-            filterStudents(); // Recalculates filtered list and re-renders student table
-            
-            // Reports
-            updateMetrics();
-            loadReportData();
+            filterStudents(); 
+            updateDashboardMetrics();
+            updateReportMetrics();
+            loadReportTables();
             populateIndividualStudentSelect();
-
-            // Grades
             loadGradesTable();
             populateCommStudentSelect();
-
-            // Discipline
             loadDisciplineTable();
-
-            // Communication
             loadCommLogs();
-
-            // Charts
             updateAllCharts();
             console.log("Sync complete.");
         }
 
-        // --- UTILITY FUNCTIONS ---
         function calculateSubjectAverage(grades) {
             if (!grades || grades.length === 0) return 0;
             return grades.reduce((a, b) => a + b, 0) / grades.length;
         }
 
         function calculateOverallAverage(student) {
-            const subjectAvgs = Object.values(student.grades)
-                .map(calculateSubjectAverage)
-                .filter(avg => avg > 0);
+            const subjectAvgs = Object.values(student.grades).map(calculateSubjectAverage).filter(avg => avg > 0);
             if (subjectAvgs.length === 0) return 0;
             return subjectAvgs.reduce((a, b) => a + b, 0) / subjectAvgs.length;
         }
@@ -426,18 +370,9 @@
         function showConfirmation(message, onConfirm) {
             const modal = document.getElementById('confirmationModal');
             document.getElementById('confirmationMessage').textContent = message;
-            
             const confirmButton = document.getElementById('confirmButton');
-            const cancelButton = document.getElementById('cancelButton');
-
-            const confirmAndClose = () => {
-                onConfirm();
-                closeModal('confirmationModal');
-            };
-
-            confirmButton.onclick = confirmAndClose;
-            cancelButton.onclick = () => closeModal('confirmationModal');
-            
+            document.getElementById('cancelButton').onclick = () => closeModal('confirmationModal');
+            confirmButton.onclick = () => { onConfirm(); closeModal('confirmationModal'); };
             modal.classList.remove('hidden');
         }
 
@@ -445,7 +380,6 @@
         function showTab(tabName, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.getElementById(tabName).classList.remove('hidden');
-            
             document.querySelectorAll('#main-nav button').forEach(btn => btn.classList.remove('tab-active'));
             element.classList.add('tab-active');
         }
@@ -477,6 +411,10 @@
         function updateLastUpdateTime() {
             document.getElementById('lastUpdateTime').textContent = new Date().toLocaleString('vi-VN');
         }
+        
+        function showModal(modalId) {
+             document.getElementById(modalId).classList.remove('hidden');
+        }
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
@@ -485,9 +423,7 @@
         // --- CHART MANAGEMENT ---
         function createChart(elementId, type, data, options) {
             const ctx = document.getElementById(elementId).getContext('2d');
-            if (chartInstances[elementId]) {
-                chartInstances[elementId].destroy();
-            }
+            if (chartInstances[elementId]) chartInstances[elementId].destroy();
             chartInstances[elementId] = new Chart(ctx, { type, data, options });
         }
 
@@ -498,14 +434,12 @@
         }
 
         function updateAllCharts() {
-            // Grade Distribution Chart
             const gradeDistData = { 'Xuất sắc': 0, 'Giỏi': 0, 'Khá': 0, 'Trung bình': 0, 'Yếu': 0 };
             studentsData.forEach(s => gradeDistData[getClassification(calculateOverallAverage(s))]++);
             chartInstances.distributionChart.data.labels = Object.keys(gradeDistData);
             chartInstances.distributionChart.data.datasets[0].data = Object.values(gradeDistData);
             chartInstances.distributionChart.update();
             
-            // Discipline Distribution Chart
             const discDistData = { 'Tốt': 0, 'Khá': 0, 'Trung bình': 0, 'Yếu': 0 };
             studentsData.forEach(s => discDistData[getDisciplineClassification(s.disciplineScore)]++);
             chartInstances.disciplineChart.data.labels = Object.keys(discDistData);
@@ -544,7 +478,7 @@
                 (!gradeFilter || getClassification(calculateOverallAverage(s)) === gradeFilter) &&
                 (s.name.toLowerCase().includes(searchTerm) || s.studentId.toLowerCase().includes(searchTerm))
             );
-            sortStudents(); // This will call loadStudentsTable
+            sortStudents();
         }
 
         function sortStudents() {
@@ -562,7 +496,7 @@
 
         function showAddStudentModal() {
             document.getElementById('addStudentForm').reset();
-            document.getElementById('addStudentModal').classList.remove('hidden');
+            showModal('addStudentModal');
         }
 
         function addNewStudent(event) {
@@ -590,7 +524,7 @@
             document.getElementById('editStudentId').value = student.studentId;
             document.getElementById('editStudentGender').value = student.gender;
             document.getElementById('editStudentBirthdate').value = student.birthdate;
-            document.getElementById('editStudentModal').classList.remove('hidden');
+            showModal('editStudentModal');
         }
 
         function updateStudent(event) {
@@ -641,7 +575,7 @@
             document.getElementById('addGradeForm').reset();
             document.getElementById('gradeStudentId').value = studentId;
             document.getElementById('gradeSubject').value = subject;
-            document.getElementById('addGradeModal').classList.remove('hidden');
+            showModal('addGradeModal');
         }
 
         function addGrade(event) {
@@ -651,10 +585,58 @@
             const grade = parseFloat(document.getElementById('gradeValue').value);
             const student = studentsData.find(s => s.id === studentId);
             if (student && !isNaN(grade)) {
+                if (!student.grades[subject]) student.grades[subject] = [];
                 student.grades[subject].push(grade);
                 closeModal('addGradeModal');
                 showSuccessToast('Đã thêm điểm thành công!');
                 syncAllData();
+            }
+        }
+
+        function showBulkGradeModal() {
+            loadBulkGradeTable();
+            showModal('bulkGradeModal');
+        }
+
+        function loadBulkGradeTable() {
+            const tbody = document.getElementById('bulkGradeTableBody');
+            tbody.innerHTML = '';
+            studentsData.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-3 font-medium">${index + 1}</td>
+                    <td class="px-4 py-3 font-medium">${student.name}</td>
+                    <td class="px-4 py-3">
+                        <input type="number" min="0" max="10" step="0.1" 
+                               class="w-full border rounded px-2 py-1 bulk-grade-input" 
+                               data-student-id="${student.id}" placeholder="0.0-10.0">
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function saveBulkGrades() {
+            const gradeInputs = document.querySelectorAll('.bulk-grade-input');
+            let addedCount = 0;
+            gradeInputs.forEach(input => {
+                const studentId = parseInt(input.dataset.studentId);
+                const gradeValue = parseFloat(input.value);
+                if (!isNaN(gradeValue)) {
+                    const student = studentsData.find(s => s.id === studentId);
+                    if (student) {
+                        if (!student.grades[currentSubject]) student.grades[currentSubject] = [];
+                        student.grades[currentSubject].push(gradeValue);
+                        addedCount++;
+                    }
+                }
+            });
+            if (addedCount > 0) {
+                closeModal('bulkGradeModal');
+                showSuccessToast(`Đã thêm điểm cho ${addedCount} học sinh!`);
+                syncAllData();
+            } else {
+                showSuccessToast('Không có điểm nào hợp lệ được nhập.');
             }
         }
         
@@ -681,7 +663,7 @@
         function showAddRewardModal(studentId) {
             document.getElementById('addRewardForm').reset();
             document.getElementById('rewardStudentId').value = studentId;
-            document.getElementById('addRewardModal').classList.remove('hidden');
+            showModal('addRewardModal');
         }
 
         function addReward(event) {
@@ -702,7 +684,7 @@
         function showAddViolationModal(studentId) {
             document.getElementById('addViolationForm').reset();
             document.getElementById('violationStudentId').value = studentId;
-            document.getElementById('addViolationModal').classList.remove('hidden');
+            showModal('addViolationModal');
         }
 
         function addViolation(event) {
@@ -720,13 +702,10 @@
             }
         }
 
-        // --- ATTENDANCE MANAGEMENT ---
+        // --- ATTENDANCE & COMMUNICATION ---
         function loadAttendanceTable() {
             const date = document.getElementById('attendanceDate').value;
-            if (!date) {
-                showSuccessToast('Vui lòng chọn ngày điểm danh.');
-                return;
-            }
+            if (!date) { showSuccessToast('Vui lòng chọn ngày điểm danh.'); return; }
             const tbody = document.getElementById('attendanceTableBody');
             tbody.innerHTML = '';
             studentsData.forEach((student, index) => {
@@ -735,15 +714,12 @@
                 row.innerHTML = `
                     <td class="px-4 py-3 font-medium">${index + 1}</td>
                     <td class="px-4 py-3 font-medium">${student.name}</td>
-                    <td class="px-4 py-3">
-                        <div class="flex space-x-4">
-                            <label class="flex items-center"><input type="radio" name="status-${student.id}" value="present" ${status === 'present' ? 'checked' : ''} class="mr-2">Có mặt</label>
-                            <label class="flex items-center"><input type="radio" name="status-${student.id}" value="late" ${status === 'late' ? 'checked' : ''} class="mr-2">Đi muộn</label>
-                            <label class="flex items-center"><input type="radio" name="status-${student.id}" value="absent_excused" ${status === 'absent_excused' ? 'checked' : ''} class="mr-2">Vắng có phép</label>
-                            <label class="flex items-center"><input type="radio" name="status-${student.id}" value="absent_unexcused" ${status === 'absent_unexcused' ? 'checked' : ''} class="mr-2">Vắng không phép</label>
-                        </div>
-                    </td>
-                `;
+                    <td class="px-4 py-3"><div class="flex space-x-4">
+                        <label class="flex items-center"><input type="radio" name="status-${student.id}" value="present" ${status === 'present' ? 'checked' : ''} class="mr-2">Có mặt</label>
+                        <label class="flex items-center"><input type="radio" name="status-${student.id}" value="late" ${status === 'late' ? 'checked' : ''} class="mr-2">Đi muộn</label>
+                        <label class="flex items-center"><input type="radio" name="status-${student.id}" value="absent_excused" ${status === 'absent_excused' ? 'checked' : ''} class="mr-2">Vắng có phép</label>
+                        <label class="flex items-center"><input type="radio" name="status-${student.id}" value="absent_unexcused" ${status === 'absent_unexcused' ? 'checked' : ''} class="mr-2">Vắng không phép</label>
+                    </div></td>`;
                 tbody.appendChild(row);
             });
             document.getElementById('attendanceSheet').classList.remove('hidden');
@@ -754,30 +730,16 @@
             if (!date) return;
             studentsData.forEach(student => {
                 const status = document.querySelector(`input[name="status-${student.id}"]:checked`);
-                if (status) {
-                    student.attendance[date] = status.value;
-                }
+                if (status) student.attendance[date] = status.value;
             });
             showSuccessToast(`Đã lưu điểm danh ngày ${date}!`);
             syncAllData();
         }
 
-        // --- COMMUNICATION MANAGEMENT ---
         function populateCommStudentSelect() {
             const select = document.getElementById('commStudentSelect');
             select.innerHTML = '<option value="">Chọn học sinh</option>';
-            studentsData.forEach(student => {
-                const option = document.createElement('option');
-                option.value = student.id;
-                option.textContent = student.name;
-                select.appendChild(option);
-            });
-        }
-
-        function showAddCommLogModal() {
-            document.getElementById('addCommLogForm').reset();
-            document.getElementById('commDate').valueAsDate = new Date();
-            document.getElementById('addCommLogModal').classList.remove('hidden');
+            studentsData.forEach(student => select.innerHTML += `<option value="${student.id}">${student.name}</option>`);
         }
 
         function addCommLog(event) {
@@ -785,11 +747,7 @@
             const studentId = parseInt(document.getElementById('commStudentSelect').value);
             const student = studentsData.find(s => s.id === studentId);
             if (student) {
-                const log = {
-                    date: document.getElementById('commDate').value,
-                    content: document.getElementById('commContent').value,
-                };
-                student.communication.push(log);
+                student.communication.push({ date: document.getElementById('commDate').value, content: document.getElementById('commContent').value });
                 closeModal('addCommLogModal');
                 showSuccessToast('Đã lưu nhật ký liên lạc!');
                 syncAllData();
@@ -801,64 +759,73 @@
             container.innerHTML = '';
             let hasLogs = false;
             studentsData.forEach(student => {
-                if (student.communication.length > 0) {
+                if (student.communication && student.communication.length > 0) {
                     hasLogs = true;
                     student.communication.forEach(log => {
                         const div = document.createElement('div');
                         div.className = 'p-3 bg-gray-50 rounded-lg border';
-                        div.innerHTML = `
-                            <p class="font-medium">${student.name} - <span class="text-gray-600">${new Date(log.date).toLocaleDateString('vi-VN')}</span></p>
-                            <p class="text-sm text-gray-700 mt-1">${log.content}</p>
-                        `;
+                        div.innerHTML = `<p class="font-medium">${student.name} - <span class="text-gray-600">${new Date(log.date).toLocaleDateString('vi-VN')}</span></p><p class="text-sm text-gray-700 mt-1">${log.content}</p>`;
                         container.appendChild(div);
                     });
                 }
             });
-            if (!hasLogs) {
-                container.innerHTML = '<p class="text-gray-500">Chưa có nhật ký liên lạc nào.</p>';
-            }
+            if (!hasLogs) container.innerHTML = '<p class="text-gray-500">Chưa có nhật ký liên lạc nào.</p>';
         }
 
-        // --- REPORTS MANAGEMENT ---
-        function updateMetrics() {
+        // --- DASHBOARD & REPORTS ---
+        function updateDashboardMetrics() {
             const totalStudents = studentsData.length;
-            const classAverage = studentsData.reduce((sum, s) => sum + calculateOverallAverage(s), 0) / totalStudents;
-            const disciplineAverage = studentsData.reduce((sum, s) => sum + s.disciplineScore, 0) / totalStudents;
+            const classAverage = totalStudents > 0 ? studentsData.reduce((sum, s) => sum + calculateOverallAverage(s), 0) / totalStudents : 0;
+            const disciplineAverage = totalStudents > 0 ? studentsData.reduce((sum, s) => sum + s.disciplineScore, 0) / totalStudents : 0;
             
-            // Calculate attendance rate
             const totalDays = Object.keys(studentsData.reduce((allDates, s) => ({...allDates, ...s.attendance}), {})).length;
             let totalPresentSessions = 0;
             studentsData.forEach(s => {
                 Object.values(s.attendance).forEach(status => {
-                    if (status === 'present' || status === 'late') {
-                        totalPresentSessions++;
-                    }
+                    if (status === 'present' || status === 'late') totalPresentSessions++;
                 });
             });
             const attendanceRate = (totalDays * totalStudents > 0) ? (totalPresentSessions / (totalDays * totalStudents)) * 100 : 0;
 
-            document.getElementById('totalStudentsMetric').textContent = totalStudents;
-            document.getElementById('classAverageMetric').textContent = classAverage.toFixed(1);
-            document.getElementById('attendanceRateMetric').textContent = attendanceRate.toFixed(1) + '%';
-            document.getElementById('disciplineAverageMetric').textContent = disciplineAverage.toFixed(1);
+            document.getElementById('dashboardTotalStudents').textContent = totalStudents;
+            document.getElementById('dashboardClassAverage').textContent = classAverage.toFixed(1);
+            document.getElementById('dashboardAttendanceRate').textContent = attendanceRate.toFixed(1) + '%';
+            document.getElementById('dashboardDisciplineAverage').textContent = disciplineAverage.toFixed(1);
         }
 
-        function loadReportData() {
-            // Top Performers
+        function updateReportMetrics() {
+            const totalStudents = studentsData.length;
+            const classAverage = totalStudents > 0 ? studentsData.reduce((sum, s) => sum + calculateOverallAverage(s), 0) / totalStudents : 0;
+            const disciplineAverage = totalStudents > 0 ? studentsData.reduce((sum, s) => sum + s.disciplineScore, 0) / totalStudents : 0;
+            const totalDays = Object.keys(studentsData.reduce((allDates, s) => ({...allDates, ...s.attendance}), {})).length;
+            let totalPresentSessions = 0;
+            studentsData.forEach(s => {
+                Object.values(s.attendance).forEach(status => {
+                    if (status === 'present' || status === 'late') totalPresentSessions++;
+                });
+            });
+            const attendanceRate = (totalDays * totalStudents > 0) ? (totalPresentSessions / (totalDays * totalStudents)) * 100 : 0;
+            
+            document.getElementById('reportTotalStudents').textContent = totalStudents;
+            document.getElementById('reportClassAverage').textContent = classAverage.toFixed(1);
+            document.getElementById('reportAttendanceRate').textContent = attendanceRate.toFixed(1) + '%';
+            document.getElementById('reportDisciplineAverage').textContent = disciplineAverage.toFixed(1);
+        }
+
+        function loadReportTables() {
             const topTbody = document.getElementById('topPerformersTable');
             topTbody.innerHTML = '';
             [...studentsData].sort((a,b) => calculateOverallAverage(b) - calculateOverallAverage(a)).slice(0, 5).forEach((s, i) => {
                 topTbody.innerHTML += `<tr><td class="px-3 py-2">${i+1}</td><td class="px-3 py-2">${s.name}</td><td class="px-3 py-2 font-bold">${calculateOverallAverage(s).toFixed(1)}</td></tr>`;
             });
 
-            // Support Needed
             const supportTbody = document.getElementById('supportNeededTable');
             supportTbody.innerHTML = '';
             studentsData.filter(s => calculateOverallAverage(s) < 6.5 || s.disciplineScore < 8).forEach(s => {
                 const issues = [];
                 if (calculateOverallAverage(s) < 6.5) issues.push('Học lực yếu');
                 if (s.disciplineScore < 8) issues.push('Nề nếp cần cải thiện');
-                supportTbody.innerHTML += `<tr><td class="px-3 py-2">${s.name}</td><td class="px-3 py-2">${issues.join(', ')}</td><td class="px-3 py-2"><button class="text-sm text-blue-600">Tạo kế hoạch</button></td></tr>`;
+                supportTbody.innerHTML += `<tr><td class="px-3 py-2">${s.name}</td><td class="px-3 py-2">${issues.join(', ')}</td></tr>`;
             });
         }
         
@@ -878,15 +845,39 @@
             }
             const avg = calculateOverallAverage(student);
             content.innerHTML = `
-                <div class="border rounded-lg p-4">
-                    <p><strong>Điểm TB học tập:</strong> ${avg.toFixed(1)} - <strong>Xếp loại:</strong> ${getClassification(avg)}</p>
-                    <p><strong>Điểm nề nếp:</strong> ${student.disciplineScore.toFixed(1)} - <strong>Xếp loại:</strong> ${getDisciplineClassification(student.disciplineScore)}</p>
-                    <h5 class="font-semibold mt-4 mb-2">Điểm chi tiết:</h5>
-                    <ul>${Object.keys(student.grades).map(key => `<li>${subjectMap[key]}: ${calculateSubjectAverage(student.grades[key]).toFixed(1)}</li>`).join('')}</ul>
+                <div class="border rounded-lg p-4 bg-gray-50">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p><strong>Điểm TB học tập:</strong> <span class="font-bold text-lg text-green-600">${avg.toFixed(1)}</span></p>
+                            <p><strong>Xếp loại học lực:</strong> <span class="font-semibold">${getClassification(avg)}</span></p>
+                        </div>
+                        <div>
+                            <p><strong>Điểm nề nếp:</strong> <span class="font-bold text-lg text-blue-600">${student.disciplineScore.toFixed(1)}</span></p>
+                            <p><strong>Xếp loại nề nếp:</strong> <span class="font-semibold">${getDisciplineClassification(student.disciplineScore)}</span></p>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                             <h5 class="font-semibold mb-2">Điểm chi tiết các môn:</h5>
+                            <ul>${Object.keys(student.grades).map(key => `<li>${subjectMap[key]}: <span class="font-medium">${calculateSubjectAverage(student.grades[key]).toFixed(1)}</span></li>`).join('')}</ul>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold mb-2">Vi phạm:</h5>
+                            ${student.violations.length > 0 ? `<ul>${student.violations.map(v => `<li>- ${v.desc} (-${v.points}đ)</li>`).join('')}</ul>` : '<p class="text-gray-500">Không có</p>'}
+                             <h5 class="font-semibold mt-2 mb-2">Khen thưởng:</h5>
+                            ${student.rewards.length > 0 ? `<ul>${student.rewards.map(r => `<li>- ${r.desc} (+${r.points}đ)</li>`).join('')}</ul>` : '<p class="text-gray-500">Không có</p>'}
+                        </div>
+                    </div>
                 </div>
             `;
             content.classList.remove('hidden');
         }
+        
+        // --- STUB FUNCTIONS for unimplemented features ---
+        function showNotifications() { showSuccessToast('Chức năng thông báo đang được phát triển.'); }
+        function exportStudentsToExcel() { showSuccessToast('Chức năng xuất Excel đang được phát triển.'); }
+        function printReport() { window.print(); }
 
     </script>
 </body>
