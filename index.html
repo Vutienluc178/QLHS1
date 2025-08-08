@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Thêm thư viện SheetJS để xử lý file Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -51,7 +53,7 @@
                     </div>
                     <div class="flex items-center space-x-2">
                         <img src="https://placehold.co/32x32/f0f0f0/333?text=GV" alt="Avatar" class="w-8 h-8 rounded-full">
-                        <span class="font-medium">Thầy Vũ Tiến Lực</span>
+                        <span class="font-medium">Cô Nguyễn Thị Lan</span>
                     </div>
                 </div>
             </div>
@@ -281,50 +283,13 @@
     <div id="addViolationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-red-700"><i class="fas fa-exclamation-triangle mr-2"></i>Ghi Nhận Vi Phạm</h3><button onclick="closeModal('addViolationModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><form id="addViolationForm" onsubmit="addViolation(event)"><input type="hidden" id="violationStudentId"><div class="space-y-4"><div><label class="block text-sm font-medium mb-2">Nội dung vi phạm *</label><input type="text" id="violationDescription" required class="w-full border rounded-lg px-3 py-2" placeholder="VD: Đi học muộn"></div><div><label class="block text-sm font-medium mb-2">Điểm trừ *</label><input type="number" id="violationPoints" step="0.5" min="0.5" max="3" value="1" required class="w-full border rounded-lg px-3 py-2"></div></div><div class="flex justify-end space-x-2 mt-6"><button type="button" onclick="closeModal('addViolationModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Ghi nhận</button></div></form></div></div>
     <div id="addCommLogModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-lg mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">Thêm Nhật Ký Liên Lạc</h3><button onclick="closeModal('addCommLogModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><form id="addCommLogForm" onsubmit="addCommLog(event)"><div class="space-y-4"><div><label class="block text-sm font-medium mb-2">Học sinh *</label><select id="commStudentSelect" required class="w-full border rounded-lg px-3 py-2"></select></div><div><label class="block text-sm font-medium mb-2">Nội dung *</label><textarea id="commContent" required class="w-full border rounded-lg px-3 py-2" rows="3" placeholder="VD: Trao đổi với phụ huynh về tình hình học tập..."></textarea></div><div><label class="block text-sm font-medium mb-2">Ngày liên lạc</label><input type="date" id="commDate" required class="w-full border rounded-lg px-3 py-2"></div></div><div class="flex justify-end space-x-2 mt-6"><button type="button" onclick="closeModal('addCommLogModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Lưu</button></div></form></div></div>
     <div id="confirmationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 max-w-sm mx-4"><h3 class="text-lg font-semibold mb-4">Xác nhận</h3><p id="confirmationMessage" class="text-gray-600 mb-6"></p><div class="flex justify-end space-x-2"><button id="cancelButton" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button id="confirmButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Xác nhận</button></div></div></div>
-    <div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"><h3 class="text-lg font-semibold mb-4">Nhập từ Excel</h3><p class="text-gray-600 mb-4">Chức năng này đang được phát triển.</p><div class="flex justify-end"><button onclick="closeModal('importModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Đóng</button></div></div></div>
+    <div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">Nhập Danh Sách Từ Excel</h3><button onclick="closeModal('importModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button></div><div class="mb-6"><div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"><i class="fas fa-file-excel text-4xl text-green-500 mb-4"></i><p class="text-lg font-medium mb-2">Kéo thả file Excel vào đây</p><p class="text-gray-500 mb-4">hoặc</p><input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFileSelect(event)"><button onclick="document.getElementById('excelFileInput').click()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Chọn File</button></div></div><div class="mb-4"><h4 class="font-medium mb-2">Định dạng file yêu cầu:</h4><div class="bg-gray-50 rounded-lg p-4 text-sm"><p><strong>Dòng 1:</strong> Tiêu đề cột. Các cột bắt buộc: <strong>Ho va ten</strong>, <strong>So bao danh</strong>, <strong>Gioi tinh</strong> (Nam/Nữ), <strong>Ngay sinh</strong> (YYYY-MM-DD).</p></div><button onclick="downloadTemplate()" class="text-blue-600 hover:text-blue-800 mt-2"><i class="fas fa-download mr-2"></i>Tải file mẫu</button></div><div id="importPreview" class="hidden mb-4"><h4 class="font-medium mb-2">Xem trước dữ liệu:</h4><div class="max-h-64 overflow-y-auto border rounded-lg"><table class="w-full text-sm"><thead class="bg-gray-50"><tr id="importPreviewHead"></tr></thead><tbody id="importPreviewBody"></tbody></table></div></div><div class="flex justify-end space-x-2"><button onclick="closeModal('importModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Hủy</button><button id="confirmImportBtn" onclick="confirmImport()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50" disabled>Nhập Dữ Liệu</button></div></div></div>
     
     <!-- Success Toast -->
     <div id="successToast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 success-animation"><div class="flex items-center"><i class="fas fa-check-circle mr-2"></i><span id="successMessage"></span></div></div>
 
     <script>
-        /* =======================
-         *  A) API CONFIG & HELPERS
-         * ======================= */
-        // TODO: DÁN URL Web App Apps Script của thầy vào đây:
-        const BASE_URL = 'https://script.google.com/macros/s/AKfycbxr-RiVjkEvJ1DhHtJ8x8sdR7l8-KVaXPWqYLCguraHsTwzj97PP2X5tCRvOPtrBv9P/exec';
-        // Nếu có dùng token trong Code.gs thì đặt giống nhau; nếu không dùng, để chuỗi rỗng ''
-        const API_TOKEN = 'changeme-optional';
-
-        async function apiGet(action, params = {}) {
-            const q = new URLSearchParams({ action, token: API_TOKEN, ...params });
-            const res = await fetch(`${BASE_URL}?${q.toString()}`);
-            return res.json();
-        }
-        async function apiPost(action, payload = {}) {
-            const res = await fetch(BASE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, token: API_TOKEN, ...payload })
-            });
-            return res.json();
-        }
-
-        async function loadStudentsFromSheet() {
-            try {
-                const resp = await apiGet('getStudents');
-                if (resp.ok && resp.data && Array.isArray(resp.data.students)) {
-                    studentsData = resp.data.students;
-                    filteredStudents = [...studentsData];
-                } else {
-                    showSuccessToast('Không tải được dữ liệu từ Sheets. Dùng dữ liệu mẫu.');
-                }
-            } catch (e) {
-                console.error(e);
-                showSuccessToast('Lỗi kết nối Sheets. Dùng dữ liệu mẫu.');
-            }
-        }
-
-        // --- DATA (mẫu; sẽ bị thay bởi Sheets nếu load thành công) ---
+        // --- DATA ---
         let studentsData = [
             { id: 1, name: 'Nguyễn Văn An', studentId: 'HS001', birthdate: '2008-03-15', gender: 'Nam', grades: { math: [8.5, 9], literature: [8], english: [7.5], physics: [8], chemistry: [7.5] }, disciplineScore: 9.5, violations: [{ desc: 'Đi muộn', points: 0.5 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
             { id: 2, name: 'Trần Thị Bình', studentId: 'HS002', birthdate: '2008-07-22', gender: 'Nữ', grades: { math: [7], literature: [8], english: [6.5], physics: [7], chemistry: [6.5] }, disciplineScore: 8, violations: [{ desc: 'Không làm BTVN', points: 1 }, { desc: 'Nói chuyện riêng', points: 1 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'absent_unexcused' }, communication: [] },
@@ -343,17 +308,15 @@
         let filteredStudents = [...studentsData];
         let currentSubject = 'math';
         let chartInstances = {};
+        let importedData = []; // Dữ liệu từ file Excel
 
         // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             showTab('dashboard', document.querySelector('#main-nav button'));
             document.getElementById('attendanceDate').valueAsDate = new Date();
             document.getElementById('commDate').valueAsDate = new Date();
             initializeSubjectTabs();
             initializeCharts();
-
-            // 🔗 Tải dữ liệu thật từ Google Sheets (nếu thành công sẽ ghi đè dữ liệu mẫu)
-            await loadStudentsFromSheet();
             syncAllData();
         });
 
@@ -404,7 +367,7 @@
             const toast = document.getElementById('successToast');
             document.getElementById('successMessage').textContent = message;
             toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 2000);
+            setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
         function showConfirmation(message, onConfirm) {
@@ -476,15 +439,15 @@
         function updateAllCharts() {
             const gradeDistData = { 'Xuất sắc': 0, 'Giỏi': 0, 'Khá': 0, 'Trung bình': 0, 'Yếu': 0 };
             studentsData.forEach(s => gradeDistData[getClassification(calculateOverallAverage(s))]++);
-            chartInstances['distributionChart'].data.labels = Object.keys(gradeDistData);
-            chartInstances['distributionChart'].data.datasets[0].data = Object.values(gradeDistData);
-            chartInstances['distributionChart'].update();
+            chartInstances.distributionChart.data.labels = Object.keys(gradeDistData);
+            chartInstances.distributionChart.data.datasets[0].data = Object.values(gradeDistData);
+            chartInstances.distributionChart.update();
             
             const discDistData = { 'Tốt': 0, 'Khá': 0, 'Trung bình': 0, 'Yếu': 0 };
             studentsData.forEach(s => discDistData[getDisciplineClassification(s.disciplineScore)]++);
-            chartInstances['disciplineChart'].data.labels = Object.keys(discDistData);
-            chartInstances['disciplineChart'].data.datasets[0].data = Object.values(discDistData);
-            chartInstances['disciplineChart'].update();
+            chartInstances.disciplineChart.data.labels = Object.keys(discDistData);
+            chartInstances.disciplineChart.data.datasets[0].data = Object.values(discDistData);
+            chartInstances.disciplineChart.update();
         }
 
         // --- STUDENT MANAGEMENT ---
@@ -502,10 +465,7 @@
                     <td class="px-4 py-3">${student.gender}</td>
                     <td class="px-4 py-3 font-bold">${avg.toFixed(1)}</td>
                     <td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-full">${classification}</span></td>
-                    <td class="px-4 py-3"><div class="flex space-x-2">
-                        <button onclick="showEditStudentModal(${student.id})" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button>
-                        <button onclick="confirmDeleteStudent(${student.id})" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
-                    </div></td>
+                    <td class="px-4 py-3"><div class="flex space-x-2"><button onclick="showEditStudentModal(${student.id})" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button><button onclick="confirmDeleteStudent(${student.id})" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button></div></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -542,8 +502,7 @@
             showModal('addStudentModal');
         }
 
-        // 🔗 GHÉP API: thêm mới học sinh (ghi Sheets)
-        async function addNewStudent(event) {
+        function addNewStudent(event) {
             event.preventDefault();
             const newStudent = {
                 id: Date.now(),
@@ -554,15 +513,10 @@
                 grades: Object.keys(subjectMap).reduce((acc, key) => ({...acc, [key]: [] }), {}),
                 disciplineScore: 10, violations: [], rewards: [], attendance: {}, communication: []
             };
-            const resp = await apiPost('upsertStudent', { student: newStudent });
-            if (resp.ok) {
-                closeModal('addStudentModal');
-                showSuccessToast('Đã thêm học sinh mới!');
-                await loadStudentsFromSheet();
-                syncAllData();
-            } else {
-                showSuccessToast('Lỗi khi thêm học sinh');
-            }
+            studentsData.push(newStudent);
+            closeModal('addStudentModal');
+            showSuccessToast('Đã thêm học sinh mới!');
+            syncAllData();
         }
 
         function showEditStudentModal(studentId) {
@@ -576,8 +530,7 @@
             showModal('editStudentModal');
         }
 
-        // 🔗 GHÉP API: cập nhật thông tin học sinh
-        async function updateStudent(event) {
+        function updateStudent(event) {
             event.preventDefault();
             const studentId = parseInt(document.getElementById('editStudentIndex').value);
             const student = studentsData.find(s => s.id === studentId);
@@ -586,32 +539,19 @@
                 student.studentId = document.getElementById('editStudentId').value;
                 student.gender = document.getElementById('editStudentGender').value;
                 student.birthdate = document.getElementById('editStudentBirthdate').value;
-
-                const resp = await apiPost('upsertStudent', { student });
-                if (resp.ok) {
-                    closeModal('editStudentModal');
-                    showSuccessToast('Đã cập nhật thông tin!');
-                    await loadStudentsFromSheet();
-                    syncAllData();
-                } else {
-                    showSuccessToast('Lỗi khi cập nhật!');
-                }
+                closeModal('editStudentModal');
+                showSuccessToast('Đã cập nhật thông tin!');
+                syncAllData();
             }
         }
         
-        // 🔗 GHÉP API: xóa học sinh
         function confirmDeleteStudent(studentId) {
             const student = studentsData.find(s => s.id === studentId);
             if (!student) return;
-            showConfirmation(`Bạn có chắc muốn xóa học sinh ${student.name}?`, async () => {
-                const resp = await apiPost('deleteStudent', { id: studentId });
-                if (resp.ok) {
-                    showSuccessToast('Đã xóa học sinh!');
-                    await loadStudentsFromSheet();
-                    syncAllData();
-                } else {
-                    showSuccessToast('Xóa thất bại!');
-                }
+            showConfirmation(`Bạn có chắc muốn xóa học sinh ${student.name}?`, () => {
+                studentsData = studentsData.filter(s => s.id !== studentId);
+                showSuccessToast('Đã xóa học sinh!');
+                syncAllData();
             });
         }
         
@@ -641,22 +581,18 @@
             showModal('addGradeModal');
         }
 
-        // 🔗 GHÉP API: thêm điểm một môn
-        async function addGrade(event) {
+        function addGrade(event) {
             event.preventDefault();
             const studentId = parseInt(document.getElementById('gradeStudentId').value);
             const subject = document.getElementById('gradeSubject').value;
             const grade = parseFloat(document.getElementById('gradeValue').value);
-            if (isNaN(grade)) return;
-
-            const resp = await apiPost('addGrade', { id: studentId, subject, value: grade });
-            if (resp.ok) {
+            const student = studentsData.find(s => s.id === studentId);
+            if (student && !isNaN(grade)) {
+                if (!student.grades[subject]) student.grades[subject] = [];
+                student.grades[subject].push(grade);
                 closeModal('addGradeModal');
                 showSuccessToast('Đã thêm điểm thành công!');
-                await loadStudentsFromSheet();
                 syncAllData();
-            } else {
-                showSuccessToast('Lỗi thêm điểm!');
             }
         }
 
@@ -683,22 +619,24 @@
             });
         }
 
-        // Lưu điểm hàng loạt (gọi API theo từng em)
-        async function saveBulkGrades() {
+        function saveBulkGrades() {
             const gradeInputs = document.querySelectorAll('.bulk-grade-input');
             let addedCount = 0;
-            for (const input of gradeInputs) {
+            gradeInputs.forEach(input => {
                 const studentId = parseInt(input.dataset.studentId);
                 const gradeValue = parseFloat(input.value);
                 if (!isNaN(gradeValue)) {
-                    const resp = await apiPost('addGrade', { id: studentId, subject: currentSubject, value: gradeValue });
-                    if (resp.ok) addedCount++;
+                    const student = studentsData.find(s => s.id === studentId);
+                    if (student) {
+                        if (!student.grades[currentSubject]) student.grades[currentSubject] = [];
+                        student.grades[currentSubject].push(gradeValue);
+                        addedCount++;
+                    }
                 }
-            }
+            });
             if (addedCount > 0) {
                 closeModal('bulkGradeModal');
                 showSuccessToast(`Đã thêm điểm cho ${addedCount} học sinh!`);
-                await loadStudentsFromSheet();
                 syncAllData();
             } else {
                 showSuccessToast('Không có điểm nào hợp lệ được nhập.');
@@ -719,12 +657,7 @@
                     <td class="px-4 py-3">${classification}</td>
                     <td class="px-4 py-3">${student.rewards.length}</td>
                     <td class="px-4 py-3">${student.violations.length}</td>
-                    <td class="px-4 py-3">
-                        <div class="flex space-x-2">
-                            <button onclick="showAddRewardModal(${student.id})" class="text-green-600 hover:text-green-800"><i class="fas fa-plus"></i></button>
-                            <button onclick="showAddViolationModal(${student.id})" class="text-red-600 hover:text-red-800"><i class="fas fa-minus"></i></button>
-                        </div>
-                    </td>
+                    <td class="px-4 py-3"><div class="flex space-x-2"><button onclick="showAddRewardModal(${student.id})" class="text-green-600 hover:text-green-800"><i class="fas fa-plus"></i></button><button onclick="showAddViolationModal(${student.id})" class="text-red-600 hover:text-red-800"><i class="fas fa-minus"></i></button></div></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -736,20 +669,18 @@
             showModal('addRewardModal');
         }
 
-        // 🔗 GHÉP API: thêm khen thưởng
-        async function addReward(event) {
+        function addReward(event) {
             event.preventDefault();
             const studentId = parseInt(document.getElementById('rewardStudentId').value);
-            const desc = document.getElementById('rewardDescription').value;
-            const points = parseFloat(document.getElementById('rewardPoints').value);
-            const resp = await apiPost('addReward', { id: studentId, desc, points });
-            if (resp.ok) {
+            const student = studentsData.find(s => s.id === studentId);
+            if (student) {
+                const points = parseFloat(document.getElementById('rewardPoints').value);
+                const desc = document.getElementById('rewardDescription').value;
+                student.rewards.push({ desc, points });
+                student.disciplineScore = Math.min(10, student.disciplineScore + points);
                 closeModal('addRewardModal');
                 showSuccessToast('Đã thêm khen thưởng!');
-                await loadStudentsFromSheet();
                 syncAllData();
-            } else {
-                showSuccessToast('Lỗi thêm khen thưởng!');
             }
         }
 
@@ -759,20 +690,18 @@
             showModal('addViolationModal');
         }
 
-        // 🔗 GHÉP API: thêm vi phạm
-        async function addViolation(event) {
+        function addViolation(event) {
             event.preventDefault();
             const studentId = parseInt(document.getElementById('violationStudentId').value);
-            const desc = document.getElementById('violationDescription').value;
-            const points = parseFloat(document.getElementById('violationPoints').value);
-            const resp = await apiPost('addViolation', { id: studentId, desc, points });
-            if (resp.ok) {
+            const student = studentsData.find(s => s.id === studentId);
+            if (student) {
+                const points = parseFloat(document.getElementById('violationPoints').value);
+                const desc = document.getElementById('violationDescription').value;
+                student.violations.push({ desc, points });
+                student.disciplineScore = Math.max(0, student.disciplineScore - points);
                 closeModal('addViolationModal');
                 showSuccessToast('Đã ghi nhận vi phạm!');
-                await loadStudentsFromSheet();
                 syncAllData();
-            } else {
-                showSuccessToast('Lỗi ghi nhận vi phạm!');
             }
         }
 
@@ -799,19 +728,14 @@
             document.getElementById('attendanceSheet').classList.remove('hidden');
         }
 
-        // 🔗 GHÉP API: lưu điểm danh (gọi theo từng em)
-        async function saveAttendance() {
+        function saveAttendance() {
             const date = document.getElementById('attendanceDate').value;
             if (!date) return;
-            let saved = 0;
-            for (const student of studentsData) {
-                const statusEl = document.querySelector(`input[name="status-${student.id}"]:checked`);
-                if (!statusEl) continue;
-                const resp = await apiPost('saveAttendance', { id: student.id, date, status: statusEl.value });
-                if (resp.ok) saved++;
-            }
-            showSuccessToast(`Đã lưu điểm danh ${saved}/${studentsData.length} em!`);
-            await loadStudentsFromSheet();
+            studentsData.forEach(student => {
+                const status = document.querySelector(`input[name="status-${student.id}"]:checked`);
+                if (status) student.attendance[date] = status.value;
+            });
+            showSuccessToast(`Đã lưu điểm danh ngày ${date}!`);
             syncAllData();
         }
 
@@ -821,23 +745,15 @@
             studentsData.forEach(student => select.innerHTML += `<option value="${student.id}">${student.name}</option>`);
         }
 
-        // 🔗 GHÉP API: lưu nhật ký liên lạc
-        async function addCommLog(event) {
+        function addCommLog(event) {
             event.preventDefault();
             const studentId = parseInt(document.getElementById('commStudentSelect').value);
             const student = studentsData.find(s => s.id === studentId);
             if (student) {
-                const date = document.getElementById('commDate').value;
-                const content = document.getElementById('commContent').value;
-                const resp = await apiPost('addCommLog', { id: studentId, date, content });
-                if (resp.ok) {
-                    closeModal('addCommLogModal');
-                    showSuccessToast('Đã lưu nhật ký liên lạc!');
-                    await loadStudentsFromSheet();
-                    syncAllData();
-                } else {
-                    showSuccessToast('Lỗi lưu nhật ký!');
-                }
+                student.communication.push({ date: document.getElementById('commDate').value, content: document.getElementById('commContent').value });
+                closeModal('addCommLogModal');
+                showSuccessToast('Đã lưu nhật ký liên lạc!');
+                syncAllData();
             }
         }
 
@@ -961,6 +877,109 @@
             content.classList.remove('hidden');
         }
         
+        // --- EXCEL IMPORT FUNCTIONS ---
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array', cellDates:true});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                // Map header names to lowercase, no-space keys
+                const headers = json[0].map(h => h.toLowerCase().replace(/ /g, ''));
+                const rows = json.slice(1);
+                
+                importedData = rows.map(row => {
+                    const student = {};
+                    headers.forEach((header, index) => {
+                        student[header] = row[index];
+                    });
+                    return student;
+                });
+
+                showImportPreview(headers, importedData);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showImportPreview(headers, data) {
+            const preview = document.getElementById('importPreview');
+            const head = document.getElementById('importPreviewHead');
+            const body = document.getElementById('importPreviewBody');
+            
+            head.innerHTML = '';
+            body.innerHTML = '';
+
+            headers.forEach(header => {
+                head.innerHTML += `<th class="px-3 py-2 text-left">${header}</th>`;
+            });
+
+            data.slice(0, 5).forEach(row => { // Show first 5 rows
+                let rowHtml = '<tr>';
+                headers.forEach(header => {
+                    rowHtml += `<td class="px-3 py-2">${row[header] || ''}</td>`;
+                });
+                rowHtml += '</tr>';
+                body.innerHTML += rowHtml;
+            });
+            
+            preview.classList.remove('hidden');
+            document.getElementById('confirmImportBtn').disabled = false;
+        }
+
+        function confirmImport() {
+            if (importedData.length === 0) {
+                showSuccessToast('Không có dữ liệu để nhập.');
+                return;
+            }
+
+            let addedCount = 0;
+            importedData.forEach(row => {
+                // Validate required fields
+                if (row['hovaten'] && row['sobaodanh'] && row['gioitinh'] && row['ngaysinh']) {
+                    const newStudent = {
+                        id: Date.now() + Math.random(),
+                        name: row['hovaten'],
+                        studentId: String(row['sobaodanh']),
+                        gender: row['gioitinh'],
+                        birthdate: new Date(row['ngaysinh']).toISOString().split('T')[0],
+                        grades: Object.keys(subjectMap).reduce((acc, key) => ({...acc, [key]: [] }), {}),
+                        disciplineScore: 10, violations: [], rewards: [], attendance: {}, communication: []
+                    };
+                    studentsData.push(newStudent);
+                    addedCount++;
+                }
+            });
+
+            if (addedCount > 0) {
+                showSuccessToast(`Đã nhập thành công ${addedCount} học sinh!`);
+                syncAllData();
+            } else {
+                showSuccessToast('Không tìm thấy dữ liệu hợp lệ. Vui lòng kiểm tra định dạng file.');
+            }
+            
+            closeModal('importModal');
+            importedData = [];
+            document.getElementById('importPreview').classList.add('hidden');
+            document.getElementById('confirmImportBtn').disabled = true;
+        }
+
+        function downloadTemplate() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Ho va ten,So bao danh,Gioi tinh,Ngay sinh\n"
+                + "Trần Văn Mẫu,HS999,Nam,2008-01-01\n";
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "mau_nhap_hoc_sinh.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         // --- STUB FUNCTIONS for unimplemented features ---
         function showNotifications() { showSuccessToast('Chức năng thông báo đang được phát triển.'); }
         function exportStudentsToExcel() { showSuccessToast('Chức năng xuất Excel đang được phát triển.'); }
