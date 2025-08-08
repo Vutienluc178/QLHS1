@@ -5,25 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App Quản Lý Học Sinh - Hoàn Thiện</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-  const BASE_URL = 'https://script.google.com/macros/s/AKfycbwyD7dnVo7MVS9sxOO0RcAglqvmfIgjdyaK8vcJs57tzJubXAO-4E-jZ7GmXT3Nuu-0/exec'; // dán URL của thầy
-  const API_TOKEN = 'changeme-optional'; // nếu Code.gs đặt token (khớp nhau)
-
-  async function apiGet(action, params = {}) {
-    const q = new URLSearchParams({ action, token: API_TOKEN, ...params });
-    const res = await fetch(`${BASE_URL}?${q.toString()}`);
-    return res.json();
-  }
-  async function apiPost(action, payload = {}) {
-    const res = await fetch(BASE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, token: API_TOKEN, ...payload })
-    });
-    return res.json();
-  }
-</script>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -59,7 +40,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-graduation-cap text-2xl"></i>
-                    <h1 class="text-xl font-bold">Quản Lý Học Sinh Lớp 10A1</h1>
+                    <h1 class="text-xl font-bold">Quản Lý Học Sinh Lớp 10A8 NHC NH 2025-2026</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="relative">
@@ -70,7 +51,7 @@
                     </div>
                     <div class="flex items-center space-x-2">
                         <img src="https://placehold.co/32x32/f0f0f0/333?text=GV" alt="Avatar" class="w-8 h-8 rounded-full">
-                        <span class="font-medium">Thầy Vũ Tiến Lực</span>
+                        <span class="font-medium">Thầy Vũ Tiến Lực NHC</span>
                     </div>
                 </div>
             </div>
@@ -306,653 +287,54 @@
     <div id="successToast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 success-animation"><div class="flex items-center"><i class="fas fa-check-circle mr-2"></i><span id="successMessage"></span></div></div>
 
     <script>
-        // --- DATA ---
-       async function loadStudentsFromSheet() {
-  const resp = await apiGet('getStudents');
-  if (resp.ok) {
-    studentsData = resp.data.students;
-    filteredStudents = [...studentsData];
-  } else {
-    showSuccessToast('Không tải được dữ liệu từ Sheets');
-  }
-}
+        /* =======================
+         *  A) API CONFIG & HELPERS
+         * ======================= */
+        // TODO: DÁN URL Web App Apps Script của thầy vào đây:
+        const BASE_URL = 'https://script.google.com/macros/s/AKfycbxL89P-bQ79IHBwFk0ELgKmw36kQ18F1yHZMMEo5GVBKZYEAf1PRnC1gEq8wJ2-dIm1/exec';
+        // Nếu có dùng token trong Code.gs thì đặt giống nhau; nếu không dùng, để chuỗi rỗng ''
+        const API_TOKEN = 'changeme-optional';
 
-document.addEventListener('DOMContentLoaded', async function() {
-  showTab('dashboard', document.querySelector('#main-nav button'));
-  document.getElementById('attendanceDate').valueAsDate = new Date();
-  document.getElementById('commDate').valueAsDate = new Date();
-  initializeSubjectTabs();
-  initializeCharts();
-
-  // ⬇️ thay vì dùng dữ liệu mẫu, gọi Sheets
-  await loadStudentsFromSheet();
-  syncAllData();
-});
-
-        const subjectMap = { math: 'Toán', literature: 'Ngữ văn', english: 'Tiếng Anh', physics: 'Vật lý', chemistry: 'Hóa học' };
-
-        // --- GLOBAL STATE ---
-        let filteredStudents = [...studentsData];
-        let currentSubject = 'math';
-        let chartInstances = {};
-
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', function() {
-            showTab('dashboard', document.querySelector('#main-nav button'));
-            document.getElementById('attendanceDate').valueAsDate = new Date();
-            document.getElementById('commDate').valueAsDate = new Date();
-            initializeSubjectTabs();
-            initializeCharts();
-            syncAllData();
-        });
-
-        // --- CORE SYNC & UTILITY FUNCTIONS ---
-        function syncAllData() {
-            console.log("Syncing all application data...");
-            updateLastUpdateTime();
-            filterStudents(); 
-            updateDashboardMetrics();
-            updateReportMetrics();
-            loadReportTables();
-            populateIndividualStudentSelect();
-            loadGradesTable();
-            populateCommStudentSelect();
-            loadDisciplineTable();
-            loadCommLogs();
-            updateAllCharts();
-            console.log("Sync complete.");
+        async function apiGet(action, params = {}) {
+            const q = new URLSearchParams({ action, token: API_TOKEN, ...params });
+            const res = await fetch(`${BASE_URL}?${q.toString()}`);
+            return res.json();
         }
-
-        function calculateSubjectAverage(grades) {
-            if (!grades || grades.length === 0) return 0;
-            return grades.reduce((a, b) => a + b, 0) / grades.length;
-        }
-
-        function calculateOverallAverage(student) {
-            const subjectAvgs = Object.values(student.grades).map(calculateSubjectAverage).filter(avg => avg > 0);
-            if (subjectAvgs.length === 0) return 0;
-            return subjectAvgs.reduce((a, b) => a + b, 0) / subjectAvgs.length;
-        }
-
-        function getClassification(average) {
-            if (average >= 9) return 'Xuất sắc';
-            if (average >= 8) return 'Giỏi';
-            if (average >= 6.5) return 'Khá';
-            if (average >= 5) return 'Trung bình';
-            return 'Yếu';
-        }
-
-        function getDisciplineClassification(score) {
-            if (score >= 9.5) return 'Tốt';
-            if (score >= 8) return 'Khá';
-            if (score >= 6.5) return 'Trung bình';
-            return 'Yếu';
-        }
-
-        function showSuccessToast(message) {
-            const toast = document.getElementById('successToast');
-            document.getElementById('successMessage').textContent = message;
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
-        }
-
-        function showConfirmation(message, onConfirm) {
-            const modal = document.getElementById('confirmationModal');
-            document.getElementById('confirmationMessage').textContent = message;
-            const confirmButton = document.getElementById('confirmButton');
-            document.getElementById('cancelButton').onclick = () => closeModal('confirmationModal');
-            confirmButton.onclick = () => { onConfirm(); closeModal('confirmationModal'); };
-            modal.classList.remove('hidden');
-        }
-
-        // --- UI & TAB MANAGEMENT ---
-        function showTab(tabName, element) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.getElementById(tabName).classList.remove('hidden');
-            document.querySelectorAll('#main-nav button').forEach(btn => btn.classList.remove('tab-active'));
-            element.classList.add('tab-active');
-        }
-
-        function initializeSubjectTabs() {
-            const nav = document.getElementById('subject-nav');
-            nav.innerHTML = '';
-            Object.keys(subjectMap).forEach((key, index) => {
-                const button = document.createElement('button');
-                button.className = `py-4 px-2 border-b-2 font-medium subject-tab ${index === 0 ? 'active' : 'border-transparent text-gray-500'}`;
-                button.textContent = subjectMap[key];
-                button.onclick = () => showSubjectGrades(key);
-                button.dataset.subject = key;
-                nav.appendChild(button);
+        async function apiPost(action, payload = {}) {
+            const res = await fetch(BASE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, token: API_TOKEN, ...payload })
             });
+            return res.json();
         }
 
-        function showSubjectGrades(subjectKey) {
-            currentSubject = subjectKey;
-            document.querySelectorAll('.subject-tab').forEach(tab => {
-                tab.classList.toggle('active', tab.dataset.subject === subjectKey);
-                tab.classList.toggle('border-transparent', tab.dataset.subject !== subjectKey);
-                tab.classList.toggle('text-gray-500', tab.dataset.subject !== subjectKey);
-            });
-            document.getElementById('currentSubjectTitle').textContent = `Bảng Điểm Môn ${subjectMap[subjectKey]}`;
-            loadGradesTable();
-        }
-
-        function updateLastUpdateTime() {
-            document.getElementById('lastUpdateTime').textContent = new Date().toLocaleString('vi-VN');
-        }
-        
-        function showModal(modalId) {
-             document.getElementById(modalId).classList.remove('hidden');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
-        // --- CHART MANAGEMENT ---
-        function createChart(elementId, type, data, options) {
-            const ctx = document.getElementById(elementId).getContext('2d');
-            if (chartInstances[elementId]) chartInstances[elementId].destroy();
-            chartInstances[elementId] = new Chart(ctx, { type, data, options });
-        }
-
-        function initializeCharts() {
-            const commonPieOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } };
-            createChart('distributionChart', 'doughnut', { labels: [], datasets: [{ data: [], backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#F97316', '#EF4444'] }] }, commonPieOptions);
-            createChart('disciplineChart', 'pie', { labels: [], datasets: [{ data: [], backgroundColor: ['#22C55E', '#8B5CF6', '#F59E0B', '#EF4444'] }] }, commonPieOptions);
-        }
-
-        function updateAllCharts() {
-            const gradeDistData = { 'Xuất sắc': 0, 'Giỏi': 0, 'Khá': 0, 'Trung bình': 0, 'Yếu': 0 };
-            studentsData.forEach(s => gradeDistData[getClassification(calculateOverallAverage(s))]++);
-            chartInstances.distributionChart.data.labels = Object.keys(gradeDistData);
-            chartInstances.distributionChart.data.datasets[0].data = Object.values(gradeDistData);
-            chartInstances.distributionChart.update();
-            
-            const discDistData = { 'Tốt': 0, 'Khá': 0, 'Trung bình': 0, 'Yếu': 0 };
-            studentsData.forEach(s => discDistData[getDisciplineClassification(s.disciplineScore)]++);
-            chartInstances.disciplineChart.data.labels = Object.keys(discDistData);
-            chartInstances.disciplineChart.data.datasets[0].data = Object.values(discDistData);
-            chartInstances.disciplineChart.update();
-        }
-
-        // --- STUDENT MANAGEMENT ---
-        function loadStudentsTable() {
-            const tbody = document.getElementById('studentsTableBody');
-            tbody.innerHTML = '';
-            filteredStudents.forEach((student, index) => {
-                const avg = calculateOverallAverage(student);
-                const classification = getClassification(avg);
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-4 py-3 font-medium">${index + 1}</td>
-                    <td class="px-4 py-3 font-medium">${student.name}</td>
-                    <td class="px-4 py-3">${student.studentId}</td>
-                    <td class="px-4 py-3">${student.gender}</td>
-                    <td class="px-4 py-3 font-bold">${avg.toFixed(1)}</td>
-                    <td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-full">${classification}</span></td>
-                    <td class="px-4 py-3"><div class="flex space-x-2"><button onclick="showEditStudentModal(${student.id})" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button><button onclick="confirmDeleteStudent(${student.id})" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button></div></td>
-                `;
-                tbody.appendChild(row);
-            });
-            document.getElementById('totalStudentsDisplay').textContent = filteredStudents.length;
-        }
-
-        function filterStudents() {
-            const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
-            const genderFilter = document.getElementById('genderFilter').value;
-            const gradeFilter = document.getElementById('gradeFilter').value;
-            filteredStudents = studentsData.filter(s => 
-                (!genderFilter || s.gender === genderFilter) &&
-                (!gradeFilter || getClassification(calculateOverallAverage(s)) === gradeFilter) &&
-                (s.name.toLowerCase().includes(searchTerm) || s.studentId.toLowerCase().includes(searchTerm))
-            );
-            sortStudents();
-        }
-
-        function sortStudents() {
-            const sortOrder = document.getElementById('sortOrder').value;
-            filteredStudents.sort((a, b) => {
-                switch(sortOrder) {
-                    case 'name_desc': return b.name.localeCompare(a.name);
-                    case 'grade_desc': return calculateOverallAverage(b) - calculateOverallAverage(a);
-                    case 'grade_asc': return calculateOverallAverage(a) - calculateOverallAverage(b);
-                    default: return a.name.localeCompare(b.name);
+        async function loadStudentsFromSheet() {
+            try {
+                const resp = await apiGet('getStudents');
+                if (resp.ok && resp.data && Array.isArray(resp.data.students)) {
+                    studentsData = resp.data.students;
+                    filteredStudents = [...studentsData];
+                } else {
+                    showSuccessToast('Không tải được dữ liệu từ Sheets. Dùng dữ liệu mẫu.');
                 }
-            });
-            loadStudentsTable();
-        }
-
-        function showAddStudentModal() {
-            document.getElementById('addStudentForm').reset();
-            showModal('addStudentModal');
-        }
-
-      async function addNewStudent(event) {
-  event.preventDefault();
-  const newStudent = {
-    id: Date.now(),
-    name: document.getElementById('studentName').value,
-    studentId: document.getElementById('studentId').value,
-    gender: document.getElementById('studentGender').value,
-    birthdate: document.getElementById('studentBirthdate').value,
-    grades: Object.keys(subjectMap).reduce((acc,k)=>({...acc,[k]:[]}),{}),
-    disciplineScore: 10,
-    violations: [],
-    rewards: [],
-    attendance: {},
-    communication: []
-  };
-  const resp = await apiPost('upsertStudent', { student: newStudent });
-  if (resp.ok) {
-    closeModal('addStudentModal');
-    showSuccessToast('Đã thêm học sinh mới!');
-    await loadStudentsFromSheet();
-    syncAllData();
-  } else {
-    showSuccessToast('Lỗi khi thêm học sinh');
-  }
-}
-
-
-        function showEditStudentModal(studentId) {
-            const student = studentsData.find(s => s.id === studentId);
-            if (!student) return;
-            document.getElementById('editStudentIndex').value = student.id;
-            document.getElementById('editStudentName').value = student.name;
-            document.getElementById('editStudentId').value = student.studentId;
-            document.getElementById('editStudentGender').value = student.gender;
-            document.getElementById('editStudentBirthdate').value = student.birthdate;
-            showModal('editStudentModal');
-        }
-
-        async function updateStudent(event) {
-  event.preventDefault();
-  const id = parseInt(document.getElementById('editStudentIndex').value);
-  const student = studentsData.find(s => s.id === id);
-  if (!student) return;
-
-  student.name = document.getElementById('editStudentName').value;
-  student.studentId = document.getElementById('editStudentId').value;
-  student.gender = document.getElementById('editStudentGender').value;
-  student.birthdate = document.getElementById('editStudentBirthdate').value;
-
-  const resp = await apiPost('upsertStudent', { student });
-  if (resp.ok) {
-    closeModal('editStudentModal');
-    showSuccessToast('Đã cập nhật thông tin!');
-    await loadStudentsFromSheet();
-    syncAllData();
-  }
-}
-
-        
-      function confirmDeleteStudent(studentId) {
-  const student = studentsData.find(s => s.id === studentId);
-  if (!student) return;
-  showConfirmation(`Bạn có chắc muốn xóa học sinh ${student.name}?`, async () => {
-    const resp = await apiPost('deleteStudent', { id: studentId });
-    if (resp.ok) {
-      showSuccessToast('Đã xóa học sinh!');
-      await loadStudentsFromSheet();
-      syncAllData();
-    }
-  });
-}
-
-        
-        // --- GRADES MANAGEMENT ---
-        function loadGradesTable() {
-            const tbody = document.getElementById('gradesTableBody');
-            tbody.innerHTML = '';
-            studentsData.forEach((student, index) => {
-                const subjectGrades = student.grades[currentSubject] || [];
-                const avg = calculateSubjectAverage(subjectGrades);
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-4 py-3 font-medium">${index + 1}</td>
-                    <td class="px-4 py-3 font-medium">${student.name}</td>
-                    <td class="px-4 py-3">${subjectGrades.join(', ') || 'Chưa có điểm'}</td>
-                    <td class="px-4 py-3 font-bold">${avg > 0 ? avg.toFixed(1) : '-'}</td>
-                    <td class="px-4 py-3"><button onclick="showAddGradeModal(${student.id}, '${currentSubject}')" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button></td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function showAddGradeModal(studentId, subject) {
-            document.getElementById('addGradeForm').reset();
-            document.getElementById('gradeStudentId').value = studentId;
-            document.getElementById('gradeSubject').value = subject;
-            showModal('addGradeModal');
-        }
-
-    async function addGrade(event) {
-  event.preventDefault();
-  const studentId = parseInt(document.getElementById('gradeStudentId').value);
-  const subject = document.getElementById('gradeSubject').value;
-  const grade = parseFloat(document.getElementById('gradeValue').value);
-  if (isNaN(grade)) return;
-
-  const resp = await apiPost('addGrade', { id: studentId, subject, value: grade });
-  if (resp.ok) {
-    closeModal('addGradeModal');
-    showSuccessToast('Đã thêm điểm thành công!');
-    await loadStudentsFromSheet();
-    syncAllData();
-  }
-}
-
-
-        function showBulkGradeModal() {
-            loadBulkGradeTable();
-            showModal('bulkGradeModal');
-        }
-
-        function loadBulkGradeTable() {
-            const tbody = document.getElementById('bulkGradeTableBody');
-            tbody.innerHTML = '';
-            studentsData.forEach((student, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-4 py-3 font-medium">${index + 1}</td>
-                    <td class="px-4 py-3 font-medium">${student.name}</td>
-                    <td class="px-4 py-3">
-                        <input type="number" min="0" max="10" step="0.1" 
-                               class="w-full border rounded px-2 py-1 bulk-grade-input" 
-                               data-student-id="${student.id}" placeholder="0.0-10.0">
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function saveBulkGrades() {
-            const gradeInputs = document.querySelectorAll('.bulk-grade-input');
-            let addedCount = 0;
-            gradeInputs.forEach(input => {
-                const studentId = parseInt(input.dataset.studentId);
-                const gradeValue = parseFloat(input.value);
-                if (!isNaN(gradeValue)) {
-                    const student = studentsData.find(s => s.id === studentId);
-                    if (student) {
-                        if (!student.grades[currentSubject]) student.grades[currentSubject] = [];
-                        student.grades[currentSubject].push(gradeValue);
-                        addedCount++;
-                    }
-                }
-            });
-            if (addedCount > 0) {
-                closeModal('bulkGradeModal');
-                showSuccessToast(`Đã thêm điểm cho ${addedCount} học sinh!`);
-                syncAllData();
-            } else {
-                showSuccessToast('Không có điểm nào hợp lệ được nhập.');
-            }
-        }
-        
-        // --- DISCIPLINE MANAGEMENT ---
-        function loadDisciplineTable() {
-            const tbody = document.getElementById('disciplineTableBody');
-            tbody.innerHTML = '';
-            studentsData.forEach((student, index) => {
-                const classification = getDisciplineClassification(student.disciplineScore);
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-4 py-3 font-medium">${index + 1}</td>
-                    <td class="px-4 py-3 font-medium">${student.name}</td>
-                    <td class="px-4 py-3 font-bold">${student.disciplineScore.toFixed(1)}</td>
-                    <td class="px-4 py-3">${classification}</td>
-                    <td class="px-4 py-3">${student.rewards.length}</td>
-                    <td class="px-4 py-3">${student.violations.length}</td>
-                    <td class="px-4 py-3"><div class="flex space-x-2"><button onclick="showAddRewardModal(${student.id})" class="text-green-600 hover:text-green-800"><i class="fas fa-plus"></i></button><button onclick="showAddViolationModal(${student.id})" class="text-red-600 hover:text-red-800"><i class="fas fa-minus"></i></button></div></td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function showAddRewardModal(studentId) {
-            document.getElementById('addRewardForm').reset();
-            document.getElementById('rewardStudentId').value = studentId;
-            showModal('addRewardModal');
-        }
-
-       async function addReward(event) {
-  event.preventDefault();
-  const studentId = parseInt(document.getElementById('rewardStudentId').value);
-  const desc = document.getElementById('rewardDescription').value;
-  const points = parseFloat(document.getElementById('rewardPoints').value);
-  const resp = await apiPost('addReward', { id: studentId, desc, points });
-  if (resp.ok) {
-    closeModal('addRewardModal');
-    showSuccessToast('Đã thêm khen thưởng!');
-    await loadStudentsFromSheet();
-    syncAllData();
-  }
-}
-
-async function addViolation(event) {
-  event.preventDefault();
-  const studentId = parseInt(document.getElementById('violationStudentId').value);
-  const desc = document.getElementById('violationDescription').value;
-  const points = parseFloat(document.getElementById('violationPoints').value);
-  const resp = await apiPost('addViolation', { id: studentId, desc, points });
-  if (resp.ok) {
-    closeModal('addViolationModal');
-    showSuccessToast('Đã ghi nhận vi phạm!');
-    await loadStudentsFromSheet();
-    syncAllData();
-  }
-}
-
-
-        function showAddViolationModal(studentId) {
-            document.getElementById('addViolationForm').reset();
-            document.getElementById('violationStudentId').value = studentId;
-            showModal('addViolationModal');
-        }
-
-        function addViolation(event) {
-            event.preventDefault();
-            const studentId = parseInt(document.getElementById('violationStudentId').value);
-            const student = studentsData.find(s => s.id === studentId);
-            if (student) {
-                const points = parseFloat(document.getElementById('violationPoints').value);
-                const desc = document.getElementById('violationDescription').value;
-                student.violations.push({ desc, points });
-                student.disciplineScore = Math.max(0, student.disciplineScore - points);
-                closeModal('addViolationModal');
-                showSuccessToast('Đã ghi nhận vi phạm!');
-                syncAllData();
+            } catch (e) {
+                console.error(e);
+                showSuccessToast('Lỗi kết nối Sheets. Dùng dữ liệu mẫu.');
             }
         }
 
-        // --- ATTENDANCE & COMMUNICATION ---
-        function loadAttendanceTable() {
-            const date = document.getElementById('attendanceDate').value;
-            if (!date) { showSuccessToast('Vui lòng chọn ngày điểm danh.'); return; }
-            const tbody = document.getElementById('attendanceTableBody');
-            tbody.innerHTML = '';
-            studentsData.forEach((student, index) => {
-                const status = student.attendance[date] || 'present';
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-4 py-3 font-medium">${index + 1}</td>
-                    <td class="px-4 py-3 font-medium">${student.name}</td>
-                    <td class="px-4 py-3"><div class="flex space-x-4">
-                        <label class="flex items-center"><input type="radio" name="status-${student.id}" value="present" ${status === 'present' ? 'checked' : ''} class="mr-2">Có mặt</label>
-                        <label class="flex items-center"><input type="radio" name="status-${student.id}" value="late" ${status === 'late' ? 'checked' : ''} class="mr-2">Đi muộn</label>
-                        <label class="flex items-center"><input type="radio" name="status-${student.id}" value="absent_excused" ${status === 'absent_excused' ? 'checked' : ''} class="mr-2">Vắng có phép</label>
-                        <label class="flex items-center"><input type="radio" name="status-${student.id}" value="absent_unexcused" ${status === 'absent_unexcused' ? 'checked' : ''} class="mr-2">Vắng không phép</label>
-                    </div></td>`;
-                tbody.appendChild(row);
-            });
-            document.getElementById('attendanceSheet').classList.remove('hidden');
-        }
-
-        async function saveAttendance() {
-  const date = document.getElementById('attendanceDate').value;
-  if (!date) return;
-  let saved = 0;
-
-  for (const s of studentsData) {
-    const radio = document.querySelector(`input[name="status-${s.id}"]:checked`);
-    if (!radio) continue;
-    const status = radio.value;
-    const resp = await apiPost('saveAttendance', { id: s.id, date, status });
-    if (resp.ok) saved++;
-  }
-  showSuccessToast(`Đã lưu điểm danh ${saved}/${studentsData.length} em!`);
-  await loadStudentsFromSheet();
-  syncAllData();
-}
-
-        function populateCommStudentSelect() {
-            const select = document.getElementById('commStudentSelect');
-            select.innerHTML = '<option value="">Chọn học sinh</option>';
-            studentsData.forEach(student => select.innerHTML += `<option value="${student.id}">${student.name}</option>`);
-        }
-
-       async function addCommLog(event) {
-  event.preventDefault();
-  const studentId = parseInt(document.getElementById('commStudentSelect').value);
-  const content = document.getElementById('commContent').value;
-  const date = document.getElementById('commDate').value;
-  const resp = await apiPost('addCommLog', { id: studentId, date, content });
-  if (resp.ok) {
-    closeModal('addCommLogModal');
-    showSuccessToast('Đã lưu nhật ký liên lạc!');
-    await loadStudentsFromSheet();
-    syncAllData();
-  }
-}
-
-
-        function loadCommLogs() {
-            const container = document.getElementById('commLogContainer');
-            container.innerHTML = '';
-            let hasLogs = false;
-            studentsData.forEach(student => {
-                if (student.communication && student.communication.length > 0) {
-                    hasLogs = true;
-                    student.communication.forEach(log => {
-                        const div = document.createElement('div');
-                        div.className = 'p-3 bg-gray-50 rounded-lg border';
-                        div.innerHTML = `<p class="font-medium">${student.name} - <span class="text-gray-600">${new Date(log.date).toLocaleDateString('vi-VN')}</span></p><p class="text-sm text-gray-700 mt-1">${log.content}</p>`;
-                        container.appendChild(div);
-                    });
-                }
-            });
-            if (!hasLogs) container.innerHTML = '<p class="text-gray-500">Chưa có nhật ký liên lạc nào.</p>';
-        }
-
-        // --- DASHBOARD & REPORTS ---
-        function updateDashboardMetrics() {
-            const totalStudents = studentsData.length;
-            const classAverage = totalStudents > 0 ? studentsData.reduce((sum, s) => sum + calculateOverallAverage(s), 0) / totalStudents : 0;
-            const disciplineAverage = totalStudents > 0 ? studentsData.reduce((sum, s) => sum + s.disciplineScore, 0) / totalStudents : 0;
-            
-            const totalDays = Object.keys(studentsData.reduce((allDates, s) => ({...allDates, ...s.attendance}), {})).length;
-            let totalPresentSessions = 0;
-            studentsData.forEach(s => {
-                Object.values(s.attendance).forEach(status => {
-                    if (status === 'present' || status === 'late') totalPresentSessions++;
-                });
-            });
-            const attendanceRate = (totalDays * totalStudents > 0) ? (totalPresentSessions / (totalDays * totalStudents)) * 100 : 0;
-
-            document.getElementById('dashboardTotalStudents').textContent = totalStudents;
-            document.getElementById('dashboardClassAverage').textContent = classAverage.toFixed(1);
-            document.getElementById('dashboardAttendanceRate').textContent = attendanceRate.toFixed(1) + '%';
-            document.getElementById('dashboardDisciplineAverage').textContent = disciplineAverage.toFixed(1);
-        }
-
-        function updateReportMetrics() {
-            const totalStudents = studentsData.length;
-            const classAverage = totalStudents > 0 ? studentsData.reduce((sum, s) => sum + calculateOverallAverage(s), 0) / totalStudents : 0;
-            const disciplineAverage = totalStudents > 0 ? studentsData.reduce((sum, s) => sum + s.disciplineScore, 0) / totalStudents : 0;
-            const totalDays = Object.keys(studentsData.reduce((allDates, s) => ({...allDates, ...s.attendance}), {})).length;
-            let totalPresentSessions = 0;
-            studentsData.forEach(s => {
-                Object.values(s.attendance).forEach(status => {
-                    if (status === 'present' || status === 'late') totalPresentSessions++;
-                });
-            });
-            const attendanceRate = (totalDays * totalStudents > 0) ? (totalPresentSessions / (totalDays * totalStudents)) * 100 : 0;
-            
-            document.getElementById('reportTotalStudents').textContent = totalStudents;
-            document.getElementById('reportClassAverage').textContent = classAverage.toFixed(1);
-            document.getElementById('reportAttendanceRate').textContent = attendanceRate.toFixed(1) + '%';
-            document.getElementById('reportDisciplineAverage').textContent = disciplineAverage.toFixed(1);
-        }
-
-        function loadReportTables() {
-            const topTbody = document.getElementById('topPerformersTable');
-            topTbody.innerHTML = '';
-            [...studentsData].sort((a,b) => calculateOverallAverage(b) - calculateOverallAverage(a)).slice(0, 5).forEach((s, i) => {
-                topTbody.innerHTML += `<tr><td class="px-3 py-2">${i+1}</td><td class="px-3 py-2">${s.name}</td><td class="px-3 py-2 font-bold">${calculateOverallAverage(s).toFixed(1)}</td></tr>`;
-            });
-
-            const supportTbody = document.getElementById('supportNeededTable');
-            supportTbody.innerHTML = '';
-            studentsData.filter(s => calculateOverallAverage(s) < 6.5 || s.disciplineScore < 8).forEach(s => {
-                const issues = [];
-                if (calculateOverallAverage(s) < 6.5) issues.push('Học lực yếu');
-                if (s.disciplineScore < 8) issues.push('Nề nếp cần cải thiện');
-                supportTbody.innerHTML += `<tr><td class="px-3 py-2">${s.name}</td><td class="px-3 py-2">${issues.join(', ')}</td></tr>`;
-            });
-        }
-        
-        function populateIndividualStudentSelect() {
-            const select = document.getElementById('individualStudentSelect');
-            select.innerHTML = '<option value="">Chọn học sinh</option>';
-            studentsData.forEach(s => select.innerHTML += `<option value="${s.id}">${s.name}</option>`);
-        }
-
-        function loadIndividualReport() {
-            const studentId = parseInt(document.getElementById('individualStudentSelect').value);
-            const content = document.getElementById('individualReportContent');
-            const student = studentsData.find(s => s.id === studentId);
-            if (!student) {
-                content.classList.add('hidden');
-                return;
-            }
-            const avg = calculateOverallAverage(student);
-            content.innerHTML = `
-                <div class="border rounded-lg p-4 bg-gray-50">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <p><strong>Điểm TB học tập:</strong> <span class="font-bold text-lg text-green-600">${avg.toFixed(1)}</span></p>
-                            <p><strong>Xếp loại học lực:</strong> <span class="font-semibold">${getClassification(avg)}</span></p>
-                        </div>
-                        <div>
-                            <p><strong>Điểm nề nếp:</strong> <span class="font-bold text-lg text-blue-600">${student.disciplineScore.toFixed(1)}</span></p>
-                            <p><strong>Xếp loại nề nếp:</strong> <span class="font-semibold">${getDisciplineClassification(student.disciplineScore)}</span></p>
-                        </div>
-                    </div>
-                    <hr class="my-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                             <h5 class="font-semibold mb-2">Điểm chi tiết các môn:</h5>
-                            <ul>${Object.keys(student.grades).map(key => `<li>${subjectMap[key]}: <span class="font-medium">${calculateSubjectAverage(student.grades[key]).toFixed(1)}</span></li>`).join('')}</ul>
-                        </div>
-                        <div>
-                            <h5 class="font-semibold mb-2">Vi phạm:</h5>
-                            ${student.violations.length > 0 ? `<ul>${student.violations.map(v => `<li>- ${v.desc} (-${v.points}đ)</li>`).join('')}</ul>` : '<p class="text-gray-500">Không có</p>'}
-                             <h5 class="font-semibold mt-2 mb-2">Khen thưởng:</h5>
-                            ${student.rewards.length > 0 ? `<ul>${student.rewards.map(r => `<li>- ${r.desc} (+${r.points}đ)</li>`).join('')}</ul>` : '<p class="text-gray-500">Không có</p>'}
-                        </div>
-                    </div>
-                </div>
-            `;
-            content.classList.remove('hidden');
-        }
-        
-        // --- STUB FUNCTIONS for unimplemented features ---
-        function showNotifications() { showSuccessToast('Chức năng thông báo đang được phát triển.'); }
-        function exportStudentsToExcel() { showSuccessToast('Chức năng xuất Excel đang được phát triển.'); }
-        function printReport() { window.print(); }
-
-    </script>
-</body>
-</html>
+        // --- DATA (mẫu; sẽ bị thay bởi Sheets nếu load thành công) ---
+        let studentsData = [
+            { id: 1, name: 'Nguyễn Văn An', studentId: 'HS001', birthdate: '2008-03-15', gender: 'Nam', grades: { math: [8.5, 9], literature: [8], english: [7.5], physics: [8], chemistry: [7.5] }, disciplineScore: 9.5, violations: [{ desc: 'Đi muộn', points: 0.5 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 2, name: 'Trần Thị Bình', studentId: 'HS002', birthdate: '2008-07-22', gender: 'Nữ', grades: { math: [7], literature: [8], english: [6.5], physics: [7], chemistry: [6.5] }, disciplineScore: 8, violations: [{ desc: 'Không làm BTVN', points: 1 }, { desc: 'Nói chuyện riêng', points: 1 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'absent_unexcused' }, communication: [] },
+            { id: 3, name: 'Lê Văn Cường', studentId: 'HS003', birthdate: '2008-11-10', gender: 'Nam', grades: { math: [9, 9.5], literature: [8.5], english: [8], physics: [9], chemistry: [8.5] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Học sinh xuất sắc', points: 1 }], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 4, name: 'Phạm Thị Dung', studentId: 'HS004', birthdate: '2008-09-05', gender: 'Nữ', grades: { math: [8], literature: [9], english: [7.8], physics: [7.5], chemistry: [8.2] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Tích cực phát biểu', points: 1 }], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 5, name: 'Hoàng Văn Em', studentId: 'HS005', birthdate: '2008-12-18', gender: 'Nam', grades: { math: [6.5], literature: [7.5], english: [6], physics: [6.8], chemistry: [6.5] }, disciplineScore: 9, violations: [{ desc: 'Đi muộn', points: 1 }], rewards: [], attendance: { '2025-05-01': 'late', '2025-05-02': 'present' }, communication: [] },
+            { id: 6, name: 'Vũ Thị Giang', studentId: 'HS006', birthdate: '2008-04-30', gender: 'Nữ', grades: { math: [9.2, 9.5], literature: [8.8], english: [8.5], physics: [9], chemistry: [9.1] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Giải nhất thi HSG', points: 2 }], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 7, name: 'Đỗ Văn Hùng', studentId: 'HS007', birthdate: '2008-06-12', gender: 'Nam', grades: { math: [5.5], literature: [6], english: [4.5], physics: [5], chemistry: [5.2] }, disciplineScore: 6.5, violations: [{ desc: 'Nghỉ không phép', points: 2 }, { desc: 'Gây mất trật tự', points: 1.5 }], rewards: [], attendance: { '2025-05-01': 'absent_unexcused', '2025-05-02': 'absent_unexcused' }, communication: [] },
+            { id: 8, name: 'Bùi Thị Hương', studentId: 'HS008', birthdate: '2008-08-25', gender: 'Nữ', grades: { math: [7.8], literature: [8.5], english: [7.2], physics: [7.5], chemistry: [7.8] }, disciplineScore: 10, violations: [], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
+            { id: 9, name: 'Lý Văn Khánh', studentId: 'HS009', birthdate: '2008-01-08', gender: 'Nam', grades: { math: [8.8], literature: [8.2], english: [8], physics: [8.5], chemistry: [8.3] }, disciplineScore: 9.5, violations: [], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'absent_excused' }, communication: [] },
+            { id: 10, name: 'Ngô Thị Linh', studentId: 'HS010', birthdate: '2008-10-14', gender: 'Nữ', grades: { math: [6.8], literature: [7.5], english: [6.5], physics: [6.8], chemistry: [7] }, disciplineScore: 9, violations: [{ desc: 'Quên đồng phục', points: 1 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] }
+        ];
+        const subjectMap = { math: 'To
