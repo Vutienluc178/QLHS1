@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App Quản Lý Học Sinh - Hoàn Thiện</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+  const BASE_URL = 'https://script.google.com/macros/s/AKfycbwyD7dnVo7MVS9sxOO0RcAglqvmfIgjdyaK8vcJs57tzJubXAO-4E-jZ7GmXT3Nuu-0/exec'; // dán URL của thầy
+  const API_TOKEN = 'changeme-optional'; // nếu Code.gs đặt token (khớp nhau)
+
+  async function apiGet(action, params = {}) {
+    const q = new URLSearchParams({ action, token: API_TOKEN, ...params });
+    const res = await fetch(`${BASE_URL}?${q.toString()}`);
+    return res.json();
+  }
+  async function apiPost(action, payload = {}) {
+    const res = await fetch(BASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, token: API_TOKEN, ...payload })
+    });
+    return res.json();
+  }
+</script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -288,18 +307,28 @@
 
     <script>
         // --- DATA ---
-        let studentsData = [
-            { id: 1, name: 'Nguyễn Văn An', studentId: 'HS001', birthdate: '2008-03-15', gender: 'Nam', grades: { math: [8.5, 9], literature: [8], english: [7.5], physics: [8], chemistry: [7.5] }, disciplineScore: 9.5, violations: [{ desc: 'Đi muộn', points: 0.5 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
-            { id: 2, name: 'Trần Thị Bình', studentId: 'HS002', birthdate: '2008-07-22', gender: 'Nữ', grades: { math: [7], literature: [8], english: [6.5], physics: [7], chemistry: [6.5] }, disciplineScore: 8, violations: [{ desc: 'Không làm BTVN', points: 1 }, { desc: 'Nói chuyện riêng', points: 1 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'absent_unexcused' }, communication: [] },
-            { id: 3, name: 'Lê Văn Cường', studentId: 'HS003', birthdate: '2008-11-10', gender: 'Nam', grades: { math: [9, 9.5], literature: [8.5], english: [8], physics: [9], chemistry: [8.5] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Học sinh xuất sắc', points: 1 }], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
-            { id: 4, name: 'Phạm Thị Dung', studentId: 'HS004', birthdate: '2008-09-05', gender: 'Nữ', grades: { math: [8], literature: [9], english: [7.8], physics: [7.5], chemistry: [8.2] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Tích cực phát biểu', points: 1 }], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
-            { id: 5, name: 'Hoàng Văn Em', studentId: 'HS005', birthdate: '2008-12-18', gender: 'Nam', grades: { math: [6.5], literature: [7.5], english: [6], physics: [6.8], chemistry: [6.5] }, disciplineScore: 9, violations: [{ desc: 'Đi muộn', points: 1 }], rewards: [], attendance: { '2025-05-01': 'late', '2025-05-02': 'present' }, communication: [] },
-            { id: 6, name: 'Vũ Thị Giang', studentId: 'HS006', birthdate: '2008-04-30', gender: 'Nữ', grades: { math: [9.2, 9.5], literature: [8.8], english: [8.5], physics: [9], chemistry: [9.1] }, disciplineScore: 10, violations: [], rewards: [{ desc: 'Giải nhất thi HSG', points: 2 }], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
-            { id: 7, name: 'Đỗ Văn Hùng', studentId: 'HS007', birthdate: '2008-06-12', gender: 'Nam', grades: { math: [5.5], literature: [6], english: [4.5], physics: [5], chemistry: [5.2] }, disciplineScore: 6.5, violations: [{ desc: 'Nghỉ không phép', points: 2 }, { desc: 'Gây mất trật tự', points: 1.5 }], rewards: [], attendance: { '2025-05-01': 'absent_unexcused', '2025-05-02': 'absent_unexcused' }, communication: [] },
-            { id: 8, name: 'Bùi Thị Hương', studentId: 'HS008', birthdate: '2008-08-25', gender: 'Nữ', grades: { math: [7.8], literature: [8.5], english: [7.2], physics: [7.5], chemistry: [7.8] }, disciplineScore: 10, violations: [], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] },
-            { id: 9, name: 'Lý Văn Khánh', studentId: 'HS009', birthdate: '2008-01-08', gender: 'Nam', grades: { math: [8.8], literature: [8.2], english: [8], physics: [8.5], chemistry: [8.3] }, disciplineScore: 9.5, violations: [], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'absent_excused' }, communication: [] },
-            { id: 10, name: 'Ngô Thị Linh', studentId: 'HS010', birthdate: '2008-10-14', gender: 'Nữ', grades: { math: [6.8], literature: [7.5], english: [6.5], physics: [6.8], chemistry: [7] }, disciplineScore: 9, violations: [{ desc: 'Quên đồng phục', points: 1 }], rewards: [], attendance: { '2025-05-01': 'present', '2025-05-02': 'present' }, communication: [] }
-        ];
+       async function loadStudentsFromSheet() {
+  const resp = await apiGet('getStudents');
+  if (resp.ok) {
+    studentsData = resp.data.students;
+    filteredStudents = [...studentsData];
+  } else {
+    showSuccessToast('Không tải được dữ liệu từ Sheets');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+  showTab('dashboard', document.querySelector('#main-nav button'));
+  document.getElementById('attendanceDate').valueAsDate = new Date();
+  document.getElementById('commDate').valueAsDate = new Date();
+  initializeSubjectTabs();
+  initializeCharts();
+
+  // ⬇️ thay vì dùng dữ liệu mẫu, gọi Sheets
+  await loadStudentsFromSheet();
+  syncAllData();
+});
+
         const subjectMap = { math: 'Toán', literature: 'Ngữ văn', english: 'Tiếng Anh', physics: 'Vật lý', chemistry: 'Hóa học' };
 
         // --- GLOBAL STATE ---
@@ -499,22 +528,32 @@
             showModal('addStudentModal');
         }
 
-        function addNewStudent(event) {
-            event.preventDefault();
-            const newStudent = {
-                id: Date.now(),
-                name: document.getElementById('studentName').value,
-                studentId: document.getElementById('studentId').value,
-                gender: document.getElementById('studentGender').value,
-                birthdate: document.getElementById('studentBirthdate').value,
-                grades: Object.keys(subjectMap).reduce((acc, key) => ({...acc, [key]: [] }), {}),
-                disciplineScore: 10, violations: [], rewards: [], attendance: {}, communication: []
-            };
-            studentsData.push(newStudent);
-            closeModal('addStudentModal');
-            showSuccessToast('Đã thêm học sinh mới!');
-            syncAllData();
-        }
+      async function addNewStudent(event) {
+  event.preventDefault();
+  const newStudent = {
+    id: Date.now(),
+    name: document.getElementById('studentName').value,
+    studentId: document.getElementById('studentId').value,
+    gender: document.getElementById('studentGender').value,
+    birthdate: document.getElementById('studentBirthdate').value,
+    grades: Object.keys(subjectMap).reduce((acc,k)=>({...acc,[k]:[]}),{}),
+    disciplineScore: 10,
+    violations: [],
+    rewards: [],
+    attendance: {},
+    communication: []
+  };
+  const resp = await apiPost('upsertStudent', { student: newStudent });
+  if (resp.ok) {
+    closeModal('addStudentModal');
+    showSuccessToast('Đã thêm học sinh mới!');
+    await loadStudentsFromSheet();
+    syncAllData();
+  } else {
+    showSuccessToast('Lỗi khi thêm học sinh');
+  }
+}
+
 
         function showEditStudentModal(studentId) {
             const student = studentsData.find(s => s.id === studentId);
@@ -527,30 +566,40 @@
             showModal('editStudentModal');
         }
 
-        function updateStudent(event) {
-            event.preventDefault();
-            const studentId = parseInt(document.getElementById('editStudentIndex').value);
-            const student = studentsData.find(s => s.id === studentId);
-            if (student) {
-                student.name = document.getElementById('editStudentName').value;
-                student.studentId = document.getElementById('editStudentId').value;
-                student.gender = document.getElementById('editStudentGender').value;
-                student.birthdate = document.getElementById('editStudentBirthdate').value;
-                closeModal('editStudentModal');
-                showSuccessToast('Đã cập nhật thông tin!');
-                syncAllData();
-            }
-        }
+        async function updateStudent(event) {
+  event.preventDefault();
+  const id = parseInt(document.getElementById('editStudentIndex').value);
+  const student = studentsData.find(s => s.id === id);
+  if (!student) return;
+
+  student.name = document.getElementById('editStudentName').value;
+  student.studentId = document.getElementById('editStudentId').value;
+  student.gender = document.getElementById('editStudentGender').value;
+  student.birthdate = document.getElementById('editStudentBirthdate').value;
+
+  const resp = await apiPost('upsertStudent', { student });
+  if (resp.ok) {
+    closeModal('editStudentModal');
+    showSuccessToast('Đã cập nhật thông tin!');
+    await loadStudentsFromSheet();
+    syncAllData();
+  }
+}
+
         
-        function confirmDeleteStudent(studentId) {
-            const student = studentsData.find(s => s.id === studentId);
-            if (!student) return;
-            showConfirmation(`Bạn có chắc muốn xóa học sinh ${student.name}?`, () => {
-                studentsData = studentsData.filter(s => s.id !== studentId);
-                showSuccessToast('Đã xóa học sinh!');
-                syncAllData();
-            });
-        }
+      function confirmDeleteStudent(studentId) {
+  const student = studentsData.find(s => s.id === studentId);
+  if (!student) return;
+  showConfirmation(`Bạn có chắc muốn xóa học sinh ${student.name}?`, async () => {
+    const resp = await apiPost('deleteStudent', { id: studentId });
+    if (resp.ok) {
+      showSuccessToast('Đã xóa học sinh!');
+      await loadStudentsFromSheet();
+      syncAllData();
+    }
+  });
+}
+
         
         // --- GRADES MANAGEMENT ---
         function loadGradesTable() {
@@ -578,20 +627,22 @@
             showModal('addGradeModal');
         }
 
-        function addGrade(event) {
-            event.preventDefault();
-            const studentId = parseInt(document.getElementById('gradeStudentId').value);
-            const subject = document.getElementById('gradeSubject').value;
-            const grade = parseFloat(document.getElementById('gradeValue').value);
-            const student = studentsData.find(s => s.id === studentId);
-            if (student && !isNaN(grade)) {
-                if (!student.grades[subject]) student.grades[subject] = [];
-                student.grades[subject].push(grade);
-                closeModal('addGradeModal');
-                showSuccessToast('Đã thêm điểm thành công!');
-                syncAllData();
-            }
-        }
+    async function addGrade(event) {
+  event.preventDefault();
+  const studentId = parseInt(document.getElementById('gradeStudentId').value);
+  const subject = document.getElementById('gradeSubject').value;
+  const grade = parseFloat(document.getElementById('gradeValue').value);
+  if (isNaN(grade)) return;
+
+  const resp = await apiPost('addGrade', { id: studentId, subject, value: grade });
+  if (resp.ok) {
+    closeModal('addGradeModal');
+    showSuccessToast('Đã thêm điểm thành công!');
+    await loadStudentsFromSheet();
+    syncAllData();
+  }
+}
+
 
         function showBulkGradeModal() {
             loadBulkGradeTable();
@@ -666,20 +717,34 @@
             showModal('addRewardModal');
         }
 
-        function addReward(event) {
-            event.preventDefault();
-            const studentId = parseInt(document.getElementById('rewardStudentId').value);
-            const student = studentsData.find(s => s.id === studentId);
-            if (student) {
-                const points = parseFloat(document.getElementById('rewardPoints').value);
-                const desc = document.getElementById('rewardDescription').value;
-                student.rewards.push({ desc, points });
-                student.disciplineScore = Math.min(10, student.disciplineScore + points);
-                closeModal('addRewardModal');
-                showSuccessToast('Đã thêm khen thưởng!');
-                syncAllData();
-            }
-        }
+       async function addReward(event) {
+  event.preventDefault();
+  const studentId = parseInt(document.getElementById('rewardStudentId').value);
+  const desc = document.getElementById('rewardDescription').value;
+  const points = parseFloat(document.getElementById('rewardPoints').value);
+  const resp = await apiPost('addReward', { id: studentId, desc, points });
+  if (resp.ok) {
+    closeModal('addRewardModal');
+    showSuccessToast('Đã thêm khen thưởng!');
+    await loadStudentsFromSheet();
+    syncAllData();
+  }
+}
+
+async function addViolation(event) {
+  event.preventDefault();
+  const studentId = parseInt(document.getElementById('violationStudentId').value);
+  const desc = document.getElementById('violationDescription').value;
+  const points = parseFloat(document.getElementById('violationPoints').value);
+  const resp = await apiPost('addViolation', { id: studentId, desc, points });
+  if (resp.ok) {
+    closeModal('addViolationModal');
+    showSuccessToast('Đã ghi nhận vi phạm!');
+    await loadStudentsFromSheet();
+    syncAllData();
+  }
+}
+
 
         function showAddViolationModal(studentId) {
             document.getElementById('addViolationForm').reset();
@@ -725,16 +790,22 @@
             document.getElementById('attendanceSheet').classList.remove('hidden');
         }
 
-        function saveAttendance() {
-            const date = document.getElementById('attendanceDate').value;
-            if (!date) return;
-            studentsData.forEach(student => {
-                const status = document.querySelector(`input[name="status-${student.id}"]:checked`);
-                if (status) student.attendance[date] = status.value;
-            });
-            showSuccessToast(`Đã lưu điểm danh ngày ${date}!`);
-            syncAllData();
-        }
+        async function saveAttendance() {
+  const date = document.getElementById('attendanceDate').value;
+  if (!date) return;
+  let saved = 0;
+
+  for (const s of studentsData) {
+    const radio = document.querySelector(`input[name="status-${s.id}"]:checked`);
+    if (!radio) continue;
+    const status = radio.value;
+    const resp = await apiPost('saveAttendance', { id: s.id, date, status });
+    if (resp.ok) saved++;
+  }
+  showSuccessToast(`Đã lưu điểm danh ${saved}/${studentsData.length} em!`);
+  await loadStudentsFromSheet();
+  syncAllData();
+}
 
         function populateCommStudentSelect() {
             const select = document.getElementById('commStudentSelect');
@@ -742,17 +813,20 @@
             studentsData.forEach(student => select.innerHTML += `<option value="${student.id}">${student.name}</option>`);
         }
 
-        function addCommLog(event) {
-            event.preventDefault();
-            const studentId = parseInt(document.getElementById('commStudentSelect').value);
-            const student = studentsData.find(s => s.id === studentId);
-            if (student) {
-                student.communication.push({ date: document.getElementById('commDate').value, content: document.getElementById('commContent').value });
-                closeModal('addCommLogModal');
-                showSuccessToast('Đã lưu nhật ký liên lạc!');
-                syncAllData();
-            }
-        }
+       async function addCommLog(event) {
+  event.preventDefault();
+  const studentId = parseInt(document.getElementById('commStudentSelect').value);
+  const content = document.getElementById('commContent').value;
+  const date = document.getElementById('commDate').value;
+  const resp = await apiPost('addCommLog', { id: studentId, date, content });
+  if (resp.ok) {
+    closeModal('addCommLogModal');
+    showSuccessToast('Đã lưu nhật ký liên lạc!');
+    await loadStudentsFromSheet();
+    syncAllData();
+  }
+}
+
 
         function loadCommLogs() {
             const container = document.getElementById('commLogContainer');
